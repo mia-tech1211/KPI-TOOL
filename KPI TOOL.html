@@ -1,0 +1,2421 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Công cụ chấm KPI Hướng dẫn 05 — Offline</title>
+  <style>:root {
+  --navy: #173f73;
+  --blue: #2868aa;
+  --blue-2: #eaf3fb;
+  --teal: #0f7b72;
+  --green: #167345;
+  --green-2: #dcf7e8;
+  --yellow: #fff4c9;
+  --yellow-2: #fff9e6;
+  --red: #b42318;
+  --red-2: #fee9e7;
+  --ink: #172235;
+  --muted: #5f6b7a;
+  --line: #d8e1eb;
+  --surface: #ffffff;
+  --canvas: #f4f7fb;
+  --shadow: 0 14px 38px rgba(23, 63, 115, .09);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 15%, rgba(82, 178, 191, .22), transparent 27%),
+    linear-gradient(115deg, #123766 0%, #174b84 58%, #0d726b 118%);
+  box-shadow: 0 8px 26px rgba(18, 55, 102, .22);
+}
+.header-inner {
+  max-width: 1520px;
+  min-height: 78px;
+  margin: 0 auto;
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.32);
+  border-radius: 14px;
+  background: rgba(255,255,255,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+  font-weight: 800;
+  letter-spacing: -.04em;
+}
+.brand h1 { margin: 0; font-size: clamp(18px, 2.3vw, 26px); line-height: 1.16; }
+.brand p { margin: 3px 0 0; color: #d9e9fa; font-size: 13px; }
+.brand-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 12px; }
+.brand-signature {
+  padding-left: 12px;
+  border-left: 1px solid rgba(255,255,255,.42);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+.header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.header-actions button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 10px;
+  color: #fff;
+  background: rgba(255,255,255,.1);
+}
+.header-actions button:hover { background: rgba(255,255,255,.19); }
+.header-actions .primary { color: #123766; background: #fff; border-color: #fff; font-weight: 700; }
+
+.tabbar {
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 0 22px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.tab-button {
+  min-width: max-content;
+  padding: 12px 15px 13px;
+  border: 0;
+  border-radius: 10px 10px 0 0;
+  color: #d9e9fa;
+  background: transparent;
+  font-weight: 650;
+}
+.tab-button:hover { color: #fff; background: rgba(255,255,255,.08); }
+.tab-button.active { color: var(--navy); background: var(--canvas); }
+.tab-button .count {
+  margin-left: 5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: inherit;
+  background: rgba(255,255,255,.18);
+  font-size: 12px;
+}
+.tab-button.active .count { background: #dbe9f7; }
+
+.workspace { max-width: 1520px; margin: 0 auto; padding: 24px 22px 50px; }
+.tab-panel { animation: reveal .18s ease-out; }
+@keyframes reveal { from { opacity: .45; transform: translateY(3px); } }
+.page-head {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+.page-head h2 { margin: 0; color: var(--navy); font-size: 23px; }
+.page-head p { margin: 5px 0 0; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px 14px; color: var(--muted); font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.swatch { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 4px; }
+.swatch.input { background: var(--yellow); }
+.swatch.auto { background: var(--blue-2); }
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card + .card { margin-top: 18px; }
+.card-head {
+  min-height: 48px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, #f8fbff, #fff);
+}
+.card-head h3 { margin: 0; color: var(--navy); font-size: 16px; }
+.card-body { padding: 17px; }
+.section-band {
+  margin: 0;
+  padding: 11px 15px;
+  color: #fff;
+  background: linear-gradient(90deg, var(--teal), #14958a);
+  font-size: 16px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.field { min-width: 0; }
+.field label { display: block; margin: 0 0 6px; color: #334155; font-size: 13px; font-weight: 700; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #d7c578;
+  border-radius: 9px;
+  outline: none;
+  color: var(--ink);
+  background: var(--yellow-2);
+}
+.field input::placeholder, .field textarea::placeholder {
+  color: #d8893f;
+  opacity: 1;
+}
+.field textarea { min-height: 78px; resize: vertical; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(40, 104, 170, .13);
+}
+.field .hint { margin-top: 5px; color: var(--muted); font-size: 12px; }
+.field .auto-field { border-color: var(--line); background: var(--blue-2); }
+
+.metric-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+}
+.metric {
+  min-height: 117px;
+  padding: 15px;
+  border: 1px solid #d8e5f1;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fff, var(--blue-2));
+}
+.metric.good { border-color: #bfe4cf; background: linear-gradient(145deg, #fff, var(--green-2)); }
+.metric.warn { border-color: #ead69a; background: linear-gradient(145deg, #fff, #fff3ca); }
+.metric.bad { border-color: #efc8c4; background: linear-gradient(145deg, #fff, var(--red-2)); }
+.metric-label { color: var(--muted); font-size: 13px; font-weight: 650; }
+.metric-value { margin-top: 13px; color: var(--navy); font-size: clamp(24px, 3vw, 34px); font-weight: 800; line-height: 1; }
+.metric.good .metric-value { color: var(--green); }
+.metric.warn .metric-value { color: #9a3a14; }
+.metric.bad .metric-value { color: var(--red); }
+.metric-sub { margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+.two-col { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; gap: 18px; }
+.two-col > .card { height: 100%; margin-top: 0; }
+.two-col > .card + .card { margin-top: 0; }
+.two-col > .card > .section-band { min-height: 48px; display: flex; align-items: center; }
+.table-wrap { width: 100%; overflow-x: visible; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; }
+th, td { padding: 10px 11px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+th:first-child, td:first-child { border-left: 1px solid var(--line); }
+thead th { position: sticky; top: 0; z-index: 1; color: #fff; background: var(--blue); font-size: 12px; white-space: nowrap; }
+thead tr:first-child th { border-top: 1px solid var(--line); }
+tbody tr:hover td { background: #f8fbff; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.center, th.center { text-align: center; }
+td.auto { background: var(--blue-2); }
+td.input-cell { background: var(--yellow-2); }
+.empty-cell { padding: 30px 15px; color: var(--muted); text-align: center; }
+.progress-track { width: 100%; min-width: 110px; height: 8px; overflow: hidden; border-radius: 99px; background: #e5edf4; }
+.progress-bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #46a79e, var(--teal)); }
+
+.data-table { width: 100%; min-width: 0 !important; table-layout: fixed; font-size: 11px; line-height: 1.25; }
+.data-table th, .data-table td { padding: 6px 4px; overflow-wrap: anywhere; word-break: normal; }
+.data-table thead th { white-space: normal; vertical-align: middle; }
+.data-table .badge { max-width: 100%; padding: 3px 4px; white-space: normal; text-align: center; }
+.data-table .action-cell { align-items: center; justify-content: center; flex-wrap: wrap; white-space: normal; }
+.data-table .btn-small { min-height: 27px; padding: 4px 6px; font-size: 10px; }
+.task-example-table { table-layout: fixed; font-size: 12px; }
+.task-example-table th, .task-example-table td { padding: 8px 7px; white-space: normal; overflow-wrap: anywhere; }
+.example-caption { margin: 0; color: var(--muted); font-size: 13px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 13px;
+}
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+.span-4 { grid-column: span 4; }
+.span-5 { grid-column: span 5; }
+.span-6 { grid-column: span 6; }
+.span-8 { grid-column: span 8; }
+.span-12 { grid-column: 1 / -1; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+.excel-import-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px;
+  border: 1px dashed #8bb3d7;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbff, #eef8f7);
+}
+.excel-import-copy { display: grid; gap: 5px; }
+.excel-import-copy strong { color: var(--navy); }
+.excel-import-copy span { color: #334155; font-size: 13px; }
+.excel-import-copy small { color: var(--muted); line-height: 1.45; }
+.excel-import-actions { flex: 0 0 auto; }
+.excel-import-status {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #b9d3eb;
+  border-radius: 9px;
+  color: var(--navy);
+  background: var(--blue-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.excel-import-status.success { border-color: #bae2c9; color: #145c39; background: #edfbf3; }
+.excel-import-status.error { border-color: #efc8c4; color: var(--red); background: var(--red-2); }
+.btn {
+  min-height: 39px;
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink);
+  background: #fff;
+  font-weight: 650;
+}
+.btn:hover { border-color: #9bb8d6; background: #f7fbff; }
+.btn-primary { color: #fff; border-color: var(--blue); background: var(--blue); }
+.btn-primary:hover { color: #fff; background: #1d578f; }
+.btn-teal { color: #fff; border-color: var(--teal); background: var(--teal); }
+.btn-teal:hover { color: #fff; background: #0b655f; }
+.btn-danger { color: var(--red); border-color: #efc8c4; background: #fff; }
+.btn-danger:hover { background: var(--red-2); }
+.btn-small { min-height: 30px; padding: 5px 9px; font-size: 12px; }
+.action-cell { display: flex; gap: 6px; white-space: nowrap; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--navy);
+  background: #e5effa;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge.good { color: var(--green); background: var(--green-2); }
+.badge.bad { color: var(--red); background: var(--red-2); }
+.badge.warn { color: #8a4a00; background: #fff0c2; }
+
+.notice {
+  padding: 12px 14px;
+  border: 1px solid #ecd589;
+  border-radius: 11px;
+  color: #664900;
+  background: var(--yellow-2);
+}
+.notice strong { color: #4d3700; }
+.notice.success { border-color: #bae2c9; color: #145c39; background: #edfbf3; }
+.warning-list { margin: 0; padding-left: 20px; }
+.warning-list li + li { margin-top: 5px; }
+
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.step { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.step-number {
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border-radius: 10px; color: #fff; background: var(--teal); font-weight: 800;
+}
+.step h3 { margin: 12px 0 5px; color: var(--navy); font-size: 15px; }
+.step p { margin: 0; color: var(--muted); font-size: 13px; }
+.formula-list { display: grid; gap: 0; }
+.formula-row { display: grid; grid-template-columns: 170px 1fr; border-bottom: 1px solid var(--line); }
+.formula-row:last-child { border-bottom: 0; }
+.formula-row strong { padding: 13px 14px; color: var(--navy); background: var(--blue-2); }
+.formula-row span { padding: 13px 14px; }
+.example {
+  padding: 18px;
+  border: 1px solid #a9ddbf;
+  border-radius: 14px;
+  color: #155a38;
+  background: linear-gradient(135deg, #effcf5, #dff8ea);
+}
+.example h3 { margin: 0 0 8px; color: #0f6940; }
+.example p { margin: 5px 0; }
+.example-result { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.rule-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 18px; }
+.rule-stack { display: grid; gap: 18px; }
+.rule-note { padding: 15px; border-left: 4px solid #e1ad24; background: var(--yellow-2); font-style: italic; }
+.footer-note { margin-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+.save-state { display: inline-flex; align-items: center; gap: 6px; color: #d9e9fa; font-size: 12px; }
+.save-dot { width: 8px; height: 8px; border-radius: 50%; background: #66d69b; box-shadow: 0 0 0 3px rgba(102,214,155,.15); }
+
+.toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 50;
+  max-width: min(390px, calc(100vw - 36px));
+  padding: 12px 15px;
+  border: 1px solid #b6d6c4;
+  border-radius: 11px;
+  color: #145c39;
+  background: #effbf4;
+  box-shadow: 0 16px 44px rgba(22, 63, 46, .18);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: .2s ease;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { color: var(--red); border-color: #efc8c4; background: #fff2f0; }
+
+@media (max-width: 1050px) {
+  .profile-grid, .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two-col, .rule-grid { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .span-2, .span-3 { grid-column: span 4; }
+  .span-4, .span-5, .span-6, .span-8 { grid-column: span 6; }
+}
+@media (max-width: 720px) {
+  body { font-size: 14px; }
+  .app-header { position: static; }
+  .header-inner { align-items: flex-start; flex-direction: column; padding: 14px 15px 11px; }
+  .header-actions { width: 100%; justify-content: flex-start; }
+  .tabbar { padding: 0 10px; }
+  .workspace { padding: 17px 12px 42px; }
+  .page-head { flex-direction: column; }
+  .legend { justify-content: flex-start; }
+  .profile-grid, .metric-grid, .steps { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .span-2, .span-3, .span-4, .span-5, .span-6, .span-8, .span-12 { grid-column: 1; }
+  .excel-import-box { align-items: stretch; flex-direction: column; }
+  .excel-import-actions .btn { width: 100%; }
+  .formula-row { grid-template-columns: 1fr; }
+  .formula-row strong { padding-bottom: 7px; }
+  .formula-row span { padding-top: 7px; }
+  .card-body { padding: 13px; }
+  .brand-mark { width: 42px; height: 42px; flex-basis: 42px; }
+  .header-actions button { flex: 1 1 auto; }
+  .brand-signature { width: 100%; padding: 3px 0 0; border-left: 0; }
+  .data-table { font-size: 8px; line-height: 1.15; }
+  .data-table th, .data-table td { padding: 4px 2px; }
+  .data-table .btn-small { min-height: 22px; padding: 2px; font-size: 8px; }
+}
+
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  body { background: #fff; font-size: 11px; }
+  .app-header, .no-print, .toast { display: none !important; }
+  .workspace { max-width: none; padding: 0; }
+  .tab-panel { display: none !important; }
+  #panel-summary { display: block !important; }
+  .card { box-shadow: none; break-inside: avoid; }
+  .metric { min-height: 82px; }
+  .metric-value { font-size: 24px; }
+  .profile-grid, .metric-grid { grid-template-columns: repeat(4, 1fr); }
+  .two-col { grid-template-columns: 1fr 1fr; }
+  input, select { border: 0 !important; background: #fff !important; padding: 0 !important; }
+  .page-head p { display: none; }
+}
+
+/* ===== BẢN IN/PDF CHÍNH THỨC ===== */
+#print-report { display: none; }
+.print-report-wrap {
+  font-family: "Times New Roman", Times, serif;
+  color: #000;
+}
+.print-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+.print-meta {
+  display: grid;
+  grid-template-columns: 110px 1fr 120px 1fr;
+  gap: 2px 8px;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.print-meta strong { font-weight: 700; }
+.print-kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 7.2px;
+  line-height: 1.15;
+}
+.print-kpi-table th,
+.print-kpi-table td {
+  border: 0.5pt solid #000;
+  padding: 2.2px 2px;
+  vertical-align: middle;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.print-kpi-table th {
+  position: static;
+  color: #000;
+  background: #fff;
+  font-weight: 700;
+  white-space: normal;
+}
+.print-kpi-table td.text-left { text-align: left; }
+.print-kpi-table .plan-head { background: #fce4d6; }
+.print-kpi-table .actual-head { background: #ddebf7; }
+.print-kpi-table .section-row td {
+  background: #fff2cc;
+  font-weight: 700;
+  text-align: left;
+  font-size: 8px;
+}
+.print-kpi-table .axis-row td {
+  background: #e2f0d9;
+  font-weight: 700;
+  text-align: left;
+}
+.print-kpi-table .subtotal-row td {
+  background: #f2f2f2;
+  font-weight: 700;
+}
+.print-kpi-table .score-row td {
+  background: #e7e6e6;
+  font-weight: 700;
+}
+.print-kpi-table .final-row td {
+  background: #ddebf7;
+  font-weight: 700;
+  font-size: 8.5px;
+}
+.print-signatures {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  text-align: center;
+  font-size: 11px;
+}
+.print-date {
+  margin-top: 10px;
+  text-align: right;
+  font-style: italic;
+  font-size: 10px;
+}
+.print-sign-title {
+  min-height: 32px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.print-sign-note { font-style: italic; margin-top: 2px; }
+.print-sign-space { height: 54px; }
+.print-sign-name { font-weight: 700; }
+.print-note {
+  margin-top: 6px;
+  font-size: 8px;
+  font-style: italic;
+}
+@media print {
+  @page { size: A4 landscape; margin: 6mm; }
+  body { background: #fff !important; }
+  .app-header, .workspace, .toast { display: none !important; }
+  #print-report { display: block !important; }
+}
+
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">KPI</div>
+        <div>
+          <h1>Công cụ chấm điểm KPI</h1>
+          <p class="brand-meta"><span>Hướng dẫn số 05 năm 2026 · Bản HTML offline</span><span class="brand-signature">KPI Tool • Designed by Ngoc Anh CĐKT QT • 2026</span></p>
+        </div>
+      </div>
+      <div>
+        <div class="header-actions no-print">
+          <button type="button" id="btn-export-xls" title="Xuất bảng chấm điểm .xlsx để in, ký và nộp lưu">Xuất Excel</button>
+          <button type="button" id="btn-export-json" title="Sao lưu toàn bộ dữ liệu">Sao lưu</button>
+          <button type="button" id="btn-import-json" title="Khôi phục dữ liệu đã sao lưu">Khôi phục</button>
+          <button type="button" id="btn-print" class="primary">In / Lưu PDF</button>
+          <input type="file" id="import-file" accept=".json,application/json" hidden>
+        </div>
+        <div class="save-state" style="margin-top:7px;justify-content:flex-end">
+          <span class="save-dot"></span><span id="save-label">Dữ liệu lưu trên thiết bị này</span>
+        </div>
+      </div>
+    </div>
+    <nav class="tabbar no-print" aria-label="Các khu vực của công cụ">
+      <button class="tab-button active" data-tab="summary" type="button">Tổng hợp</button>
+      <button class="tab-button" data-tab="tasks" type="button">Danh mục <span class="count" id="task-count-tab">0</span></button>
+      <button class="tab-button" data-tab="results" type="button">Kết quả SP <span class="count" id="result-count-tab">0</span></button>
+      <button class="tab-button" data-tab="guide" type="button">Hướng dẫn</button>
+      <button class="tab-button" data-tab="rules" type="button">Quy tắc</button>
+    </nav>
+  </header>
+
+  <main class="workspace">
+    <section class="tab-panel" id="panel-summary" data-panel="summary">
+      <div class="page-head">
+        <div>
+          <h2>Tổng hợp kết quả theo quý</h2>
+          <p>Điểm và tỷ lệ được cập nhật ngay khi nhập danh mục hoặc kết quả sản phẩm.</p>
+        </div>
+        <div class="legend">
+          <span><i class="swatch input"></i> Ô nhập dữ liệu</span>
+          <span><i class="swatch auto"></i> Kết quả tự tính</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-band">Thông tin đánh giá</h3>
+        <div class="card-body">
+          <div class="profile-grid">
+            <div class="field">
+              <label for="profile-name">Họ và tên</label>
+              <input id="profile-name" autocomplete="name" placeholder="Nhập họ tên viên chức">
+            </div>
+            <div class="field">
+              <label for="profile-unit">Đơn vị</label>
+              <select id="profile-unit">
+                <option value="">Chọn phòng/khoa</option>
+                <option value="PHÒNG TỔ CHỨC-HÀNH CHÍNH">PHÒNG TỔ CHỨC-HÀNH CHÍNH</option>
+                <option value="PHÒNG ĐÀO TẠO&amp;HTQT">PHÒNG ĐÀO TẠO&amp;HTQT</option>
+                <option value="PHÒNG ĐẢM BẢO CL&amp;CTHSSV">PHÒNG ĐẢM BẢO CL&amp;CTHSSV</option>
+                <option value="PHÒNG TUYỂN SINH&amp;GTVL">PHÒNG TUYỂN SINH&amp;GTVL</option>
+                <option value="KHOA NÔNG NGHIỆP">KHOA NÔNG NGHIỆP</option>
+                <option value="KHOA CÔNG NGHIỆP">KHOA CÔNG NGHIỆP</option>
+                <option value="KHOA KINH TẾ-DV">KHOA KINH TẾ-DV</option>
+                <option value="KHOA CƠ BẢN">KHOA CƠ BẢN</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="profile-period">Kỳ đánh giá</label>
+              <input id="profile-period" placeholder="Ví dụ: Quý III/2026">
+            </div>
+            <div class="field">
+              <label for="profile-scale">Chế độ thang</label>
+              <select id="profile-scale">
+                <option value="90">Chỉ nhiệm vụ theo chức năng/được giao (thang 90)</option>
+                <option value="100">Có cả nhiệm vụ trọng tâm, then chốt (thang 100)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric">
+              <div class="metric-label">Số nhiệm vụ</div>
+              <div class="metric-value" id="metric-tasks">0</div>
+              <div class="metric-sub">Tối đa 100 nhiệm vụ theo mẫu Excel</div>
+            </article>
+            <article class="metric">
+              <div class="metric-label">Sản phẩm kế hoạch</div>
+              <div class="metric-value" id="metric-planned">0</div>
+              <div class="metric-sub">Tổng số lượng đăng ký trong quý</div>
+            </article>
+            <article class="metric good">
+              <div class="metric-label">Sản phẩm hoàn thành</div>
+              <div class="metric-value" id="metric-completed">0</div>
+              <div class="metric-sub" id="metric-completed-sub">0 sản phẩm vượt kế hoạch</div>
+            </article>
+            <article class="metric good">
+              <div class="metric-label">Tỷ lệ KPI chung</div>
+              <div class="metric-value" id="metric-kpi">0,00%</div>
+              <div class="metric-sub">Quy đổi theo Nhóm A 90 điểm và Nhóm B 10 điểm</div>
+            </article>
+            <article class="metric">
+              <div class="metric-label">Tổng điểm chuẩn</div>
+              <div class="metric-value" id="metric-standard">0,00</div>
+              <div class="metric-sub">Số lượng kế hoạch × điểm quy đổi/SP</div>
+            </article>
+            <article class="metric good">
+              <div class="metric-label">Điểm thực hiện</div>
+              <div class="metric-value" id="metric-actual">0,00</div>
+              <div class="metric-sub">KPI nhiệm vụ × điểm chuẩn</div>
+            </article>
+            <article class="metric warn">
+              <div class="metric-label">Điểm thang <span id="scale-label">90</span> (tham khảo)</div>
+              <div class="metric-value" id="metric-scale">0,0</div>
+              <div class="metric-sub">Quy đổi tham khảo theo chế độ đã chọn</div>
+            </article>
+            <article class="metric" id="warning-metric">
+              <div class="metric-label">Dòng cần kiểm tra</div>
+              <div class="metric-value" id="metric-warnings">0</div>
+              <div class="metric-sub">Kiểm tra trước khi dùng kết quả</div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <h3 class="section-band">Tổng hợp theo nhóm công việc</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nhóm</th><th class="num">Số NV</th><th class="num">Điểm chuẩn</th><th class="num">Điểm thực hiện</th><th>Tỷ lệ</th></tr></thead>
+              <tbody id="group-summary-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="section-band">Tổng hợp theo loại nhiệm vụ</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Loại nhiệm vụ</th><th class="num">Số NV</th><th class="num">Điểm chuẩn</th><th class="num">Điểm thực hiện</th><th class="num">KPI</th><th class="num">Điểm quy đổi</th></tr></thead>
+              <tbody id="type-summary-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Cảnh báo dữ liệu</h3></div>
+        <div class="card-body" id="warning-box"></div>
+      </div>
+      <p class="footer-note">Điểm thang 90/100 chỉ là quy đổi tham khảo. Khi xếp loại chính thức, áp dụng trục kết quả, tỷ trọng và tiêu chí đã được cơ quan có thẩm quyền cụ thể hóa/phê duyệt.</p>
+    </section>
+
+    <section class="tab-panel" id="panel-tasks" data-panel="tasks" hidden>
+      <div class="page-head">
+        <div>
+          <h2>Danh mục nhiệm vụ và điểm KPI</h2>
+          <p>Mỗi dòng là một nhiệm vụ; các chỉ số A, B, C được lấy tự động từ Kết quả SP.</p>
+        </div>
+        <div class="legend">
+          <span><i class="swatch input"></i> Trường cần nhập</span>
+          <span><i class="swatch auto"></i> Trường tự tính</span>
+        </div>
+      </div>
+
+      <div class="card no-print">
+        <div class="card-head">
+          <h3>Nhập nhanh danh mục từ Excel</h3>
+          <span class="badge">XLSX · XLS · CSV</span>
+        </div>
+        <div class="card-body">
+          <div class="excel-import-box">
+            <div class="excel-import-copy">
+              <strong>Tải danh mục nhiệm vụ và điểm KPI từ máy tính</strong>
+              <span>Công cụ tự tìm dòng tiêu đề trong trang DANH MỤC. Mã đã có sẽ được cập nhật; mã mới sẽ được thêm.</span>
+              <small><strong>Cột bắt buộc:</strong> Mã NV, Tên nhiệm vụ, Sản phẩm đầu ra, Nhóm, Điểm quy đổi/SP và SL kế hoạch. <strong>Có thể thêm:</strong> Trục, Mục tiêu trọng tâm, Kết quả trọng tâm, Tiến độ đề ra và Loại nhiệm vụ. Nên dùng biểu mẫu tải từ Tool để bảo đảm đọc đúng dữ liệu.</small>
+            </div>
+            <div class="excel-import-actions" style="display:grid;gap:8px;min-width:220px">
+              <button class="btn btn-teal" type="button" id="btn-import-tasks-excel">↑ Tải danh mục từ Excel</button>
+              <button class="btn" type="button" id="btn-download-task-template">↓ Tải về biểu mẫu</button>
+              <input type="file" id="task-excel-file" accept=".xlsx,.xls,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/tab-separated-values" hidden>
+            </div>
+          </div>
+          <div class="excel-import-status" id="task-excel-status" role="status" aria-live="polite" hidden></div>
+        </div>
+      </div>
+
+      <div class="card no-print">
+        <div class="card-head">
+          <h3 id="task-form-title">Thêm nhiệm vụ</h3>
+          <span class="badge" id="task-limit-badge">0/100 nhiệm vụ</span>
+        </div>
+        <div class="card-body">
+          <form id="task-form">
+            <div class="form-grid">
+              <div class="field span-2">
+                <label for="task-code">Mã nhiệm vụ *</label>
+                <input id="task-code" required maxlength="20" placeholder="NV01">
+              </div>
+              <div class="field span-4">
+                <label for="task-axis">Trục kết quả trọng tâm *</label>
+                <select id="task-axis" required>
+                  <option value="1">Trục 1 - Kinh tế - xã hội và nhiệm vụ chính trị</option>
+                  <option value="2">Trục 2 - Thể chế, phân cấp, kiểm tra, giám sát</option>
+                  <option value="3">Trục 3 - Khoa học, công nghệ, đổi mới và chuyển đổi số</option>
+                  <option value="4">Trục 4 - Xây dựng Đảng, hệ thống chính trị và phòng, chống tiêu cực</option>
+                  <option value="5">Trục 5 - Văn hóa, con người và an sinh xã hội</option>
+                  <option value="6">Trục 6 - Quốc phòng, an ninh, đối ngoại và hội nhập</option>
+                </select>
+              </div>
+              <div class="field span-6">
+                <label for="task-name">Tên nhiệm vụ *</label>
+                <input id="task-name" required placeholder="Cập nhật hồ sơ lý lịch cán bộ, viên chức, người lao động">
+              </div>
+              <div class="field span-6">
+                <label for="task-objective">Mục tiêu trọng tâm, then chốt</label>
+                <input id="task-objective" placeholder="Ví dụ: Nâng cao chất lượng quản lý đội ngũ">
+              </div>
+              <div class="field span-6">
+                <label for="task-key-result">Kết quả trọng tâm, then chốt</label>
+                <input id="task-key-result" placeholder="Ví dụ: Hoàn thành chuẩn hóa hồ sơ đúng tiến độ">
+              </div>
+              <div class="field span-4">
+                <label for="task-output">Sản phẩm đầu ra *</label>
+                <input id="task-output" required placeholder="01 Bộ Hồ sơ giấy">
+              </div>
+              <div class="field span-2">
+                <label for="task-deadline">Tiến độ đề ra</label>
+                <input id="task-deadline" placeholder="30/9/2026">
+              </div>
+              <div class="field span-3">
+                <label for="task-type">Loại nhiệm vụ *</label>
+                <select id="task-type">
+                  <option>Theo chức năng, nhiệm vụ được giao</option>
+                  <option>Trọng tâm, then chốt</option>
+                </select>
+              </div>
+              <div class="field span-3">
+                <label for="task-group">Nhóm *</label>
+                <select id="task-group">
+                  <option value="1">Nhóm 1</option>
+                  <option value="2">Nhóm 2</option>
+                  <option value="3">Nhóm 3</option>
+                  <option value="4">Nhóm 4</option>
+                  <option value="5">Nhóm 5</option>
+                </select>
+              </div>
+              <div class="field span-2">
+                <label for="task-group-max">Điểm tối đa nhóm</label>
+                <input id="task-group-max" class="auto-field" value="100" readonly tabindex="-1">
+              </div>
+              <div class="field span-2">
+                <label for="task-unit-score">Điểm quy đổi/SP *</label>
+                <input id="task-unit-score" type="number" required min="0" max="100" step="0.01" placeholder="100">
+                <div class="hint" id="task-score-hint">Không vượt 100 điểm</div>
+              </div>
+              <div class="field span-2">
+                <label for="task-planned">Số lượng kế hoạch *</label>
+                <input id="task-planned" type="number" required min="0" step="1" placeholder="0">
+                <div class="hint">Được phép nhập 0</div>
+              </div>
+              <div class="span-6 form-actions" style="align-self:end">
+                <button class="btn btn-primary" type="submit" id="task-submit">Thêm nhiệm vụ</button>
+                <button class="btn" type="button" id="task-cancel" hidden>Hủy sửa</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Danh sách nhiệm vụ</h3>
+          <button class="btn btn-danger btn-small no-print" type="button" id="btn-clear-all">Xóa toàn bộ dữ liệu</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table task-data-table">
+            <colgroup>
+              <col style="width:4%"><col style="width:4%"><col style="width:12%"><col style="width:10%"><col style="width:12%"><col style="width:9%"><col style="width:6%"><col style="width:7%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:5%"><col style="width:5%"><col style="width:4%"><col style="width:5%"><col style="width:7%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Mã NV</th><th>Trục</th><th>Mục tiêu trọng tâm</th><th>Kết quả trọng tâm</th><th>Tên nhiệm vụ</th><th>Sản phẩm đầu ra</th><th>Tiến độ đề ra</th>
+                <th>Loại nhiệm vụ</th><th>Nhóm</th><th class="num">Điểm tối đa</th><th class="num">Điểm/SP</th>
+                <th class="num">SL kế hoạch</th><th class="num">SL hoàn thành</th><th class="num">A</th><th class="num">B</th>
+                <th class="num">C</th><th class="num">KPI</th><th class="num">Điểm chuẩn</th><th class="num">Điểm thực hiện</th>
+                <th class="num">SP vượt</th><th>Kiểm tra</th><th class="no-print">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="task-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="panel-results" data-panel="results" hidden>
+      <div class="page-head">
+        <div>
+          <h2>Nhập kết quả từng sản phẩm/công việc</h2>
+          <p>Mỗi sản phẩm thực tế nhập một dòng; chỉ tính số lần sửa do nguyên nhân chủ quan.</p>
+        </div>
+        <span class="badge" id="result-limit-badge">0/500 sản phẩm</span>
+      </div>
+
+      <div class="card no-print">
+        <div class="card-head"><h3 id="result-form-title">Thêm kết quả sản phẩm</h3></div>
+        <div class="card-body">
+          <form id="result-form">
+            <div class="form-grid">
+              <div class="field span-3">
+                <label for="result-task-code">Mã nhiệm vụ *</label>
+                <select id="result-task-code" required></select>
+              </div>
+              <div class="field span-2">
+                <label for="result-product-no">Số SP *</label>
+                <input id="result-product-no" type="number" required min="1" step="1" placeholder="1">
+              </div>
+              <div class="field span-4">
+                <label for="result-output">Sản phẩm đầu ra</label>
+                <input id="result-output" class="auto-field" readonly tabindex="-1">
+              </div>
+              <div class="field span-3">
+                <label for="result-status">Kết quả *</label>
+                <select id="result-status">
+                  <option>Hoàn thành</option>
+                  <option>Không hoàn thành</option>
+                </select>
+              </div>
+              <div class="field span-3">
+                <label for="result-revisions">Số lần sửa nội dung *</label>
+                <input id="result-revisions" type="number" required min="0" step="1" placeholder="0">
+                <div class="hint">0 lần = B 100%; từ 4 lần = B 0%</div>
+              </div>
+              <div class="field span-3">
+                <label for="result-delay">Số ngày làm việc chậm *</label>
+                <input id="result-delay" type="number" required min="0" step="1" placeholder="0">
+                <div class="hint">Mỗi ngày chậm giảm 5% điểm C</div>
+              </div>
+              <div class="field span-6">
+                <label for="result-note">Ghi chú</label>
+                <input id="result-note" placeholder="Ví dụ: Đúng hạn, đạt ngay">
+              </div>
+              <div class="span-3 form-actions" style="align-self:end">
+                <button class="btn btn-teal" type="submit" id="result-submit">Thêm sản phẩm</button>
+                <button class="btn" type="button" id="result-cancel" hidden>Hủy sửa</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Danh sách kết quả sản phẩm</h3>
+          <span class="badge good" id="completed-badge">0 hoàn thành</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table result-data-table">
+            <colgroup><col style="width:3.5%"><col style="width:5%"><col style="width:5%"><col style="width:18%"><col style="width:7%"><col style="width:5.5%"><col style="width:5%"><col style="width:5.5%"><col style="width:5%"><col style="width:18%"><col style="width:11%"><col style="width:11.5%"></colgroup>
+            <thead>
+              <tr><th class="num">STT</th><th>Mã NV</th><th class="num">Số SP</th><th>Sản phẩm đầu ra</th><th>Kết quả</th>
+              <th class="num">Số lần sửa</th><th class="num">Điểm B</th><th class="num">Ngày chậm</th><th class="num">Điểm C</th>
+              <th>Ghi chú</th><th>Kiểm tra</th><th class="no-print">Thao tác</th></tr>
+            </thead>
+            <tbody id="result-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="panel-guide" data-panel="guide" hidden>
+      <div class="page-head">
+        <div>
+          <h2>Hướng dẫn sử dụng công cụ</h2>
+          <p>Cách dùng nhanh: nhập Danh mục → nhập từng sản phẩm tại Kết quả SP → xem Tổng hợp.</p>
+        </div>
+        <button type="button" class="btn btn-primary no-print" id="btn-load-example">Nạp ví dụ NV01</button>
+      </div>
+
+      <div class="steps">
+        <article class="step"><div class="step-number">1</div><h3>Nhập danh mục</h3><p>Chọn trục kết quả; nhập mục tiêu, kết quả trọng tâm, nhiệm vụ, sản phẩm, tiến độ, nhóm, điểm quy đổi và số lượng kế hoạch.</p></article>
+        <article class="step"><div class="step-number">2</div><h3>Nhập kết quả SP</h3><p>Mỗi sản phẩm nhập một dòng: mã nhiệm vụ, số thứ tự SP, kết quả, số lần sửa nội dung và số ngày làm việc chậm.</p></article>
+        <article class="step"><div class="step-number">3</div><h3>Tool tự tính</h3><p>Hệ thống tự tính A (số lượng), B (chất lượng), C (tiến độ), KPI và điểm thực hiện từng nhiệm vụ.</p></article>
+        <article class="step"><div class="step-number">4</div><h3>Xuất bảng chấm điểm</h3><p>Kiểm tra Tổng hợp, sau đó bấm In / Lưu PDF để nhận bảng chấm điểm đúng cấu trúc, chỉ hiển thị các trục có nhiệm vụ và có vùng ký xác nhận.</p></article>
+      </div>
+
+      <div class="card">
+        <h3 class="section-band">Công thức tính</h3>
+        <div class="formula-list">
+          <div class="formula-row"><strong>A – Số lượng</strong><span>A = MIN(Số sản phẩm hoàn thành / Số sản phẩm kế hoạch; 1,00). Vượt mục tiêu không cộng thêm KPI.</span></div>
+          <div class="formula-row"><strong>B – Chất lượng</strong><span>B = Bình quân điểm chất lượng của từng sản phẩm hoàn thành: 1,00; 0,75; 0,50; 0,25; 0,00 tương ứng 0; 1; 2; 3; từ 4 lần sửa/không được chấp nhận.</span></div>
+          <div class="formula-row"><strong>C – Tiến độ</strong><span>C = Bình quân điểm tiến độ của từng sản phẩm hoàn thành. Đúng hạn = 1,00; mỗi ngày làm việc chậm do chủ quan giảm 0,05; không nhỏ hơn 0.</span></div>
+          <div class="formula-row"><strong>KPI nhiệm vụ</strong><span>KPI nhiệm vụ = (A + B + C) / 3.</span></div>
+          <div class="formula-row"><strong>Điểm thực hiện</strong><span>Điểm thực hiện = KPI nhiệm vụ × Số lượng kế hoạch × Điểm quy đổi cho 01 sản phẩm.</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-band">Ví dụ minh họa NV01</h3>
+        <div class="card-body">
+          <div class="example">
+            <h3>Cập nhật hồ sơ lý lịch cán bộ, viên chức, người lao động · Nhóm 1 · 100 điểm/sản phẩm</h3>
+            <p>Sản phẩm đầu ra: 01 Bộ Hồ sơ giấy. Kế hoạch 01 sản phẩm; hoàn thành đúng hạn và không phải sửa nội dung.</p>
+            <div class="example-result">
+              <span class="badge good">A = 100%</span><span class="badge good">B = 100%</span>
+              <span class="badge good">C = 100%</span><span class="badge good">KPI = 100%</span>
+              <span class="badge good">Điểm chuẩn = 100</span><span class="badge good">Điểm thực hiện = 100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-band">Lưu ý khi nhập dữ liệu</h3>
+        <div class="card-body">
+          <ul class="warning-list">
+            <li>Mã nhiệm vụ phải duy nhất tại Danh mục và phải trùng với mã nhập tại Kết quả SP.</li>
+            <li>Cột <strong>Số SP</strong> là số thứ tự của sản phẩm, không phải số lượng để cộng. Mỗi sản phẩm thực tế phải nhập một dòng riêng.</li>
+            <li>Điểm quy đổi/sản phẩm có thể thấp hơn nhưng không được vượt điểm tối đa của nhóm (100/200/300/400/500).</li>
+            <li>Chỉ tính số lần sửa nội dung do nguyên nhân chủ quan; không tính sửa kỹ thuật, thể thức hoặc thay đổi khách quan/cấp có thẩm quyền.</li>
+            <li>Với sản phẩm không được chấp nhận: có thể ghi Hoàn thành và nhập từ 4 lần sửa để B = 0; nếu không hoàn thành thì chọn Không hoàn thành.</li>
+            <li>Sản phẩm vượt kế hoạch được ghi riêng, không làm A vượt quá 100%.</li>
+            <li>Tệp Excel xuất ra gồm trang <strong>BẢNG CHẤM ĐIỂM</strong> để in, ký và trang <strong>CHI TIẾT SẢN PHẨM</strong> để đối chiếu.</li>
+            <li>Dữ liệu tự lưu trên trình duyệt của máy đang dùng. Nên bấm <strong>Sao lưu</strong> để chuyển sang máy khác hoặc dự phòng.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="footer-note">Nguồn áp dụng: Hướng dẫn số 05 năm 2026 về phương pháp và cách thức tính KPI; kết quả nhiệm vụ hiển thị đến 2 chữ số thập phân, khi tổng hợp xếp loại làm tròn đến 1 chữ số thập phân.</p>
+    </section>
+
+    <section class="tab-panel" id="panel-rules" data-panel="rules" hidden>
+      <div class="page-head">
+        <div><h2>Quy tắc chấm điểm KPI</h2><p>Tóm tắt quy định dùng trong các phép tính của công cụ.</p></div>
+      </div>
+      <div class="rule-grid">
+        <div class="card">
+          <h3 class="section-band">Phân nhóm công việc</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nhóm</th><th class="num">Điểm tối đa</th><th>Mô tả khái quát</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Nhóm 1</strong></td><td class="num">100</td><td>Đơn giản, lặp lại, có biểu mẫu; hành chính, bổ trợ, phục vụ.</td></tr>
+                <tr><td><strong>Nhóm 2</strong></td><td class="num">200</td><td>Chuyên môn thường xuyên, có quy trình; cần tổng hợp, phân tích, giải trình.</td></tr>
+                <tr><td><strong>Nhóm 3</strong></td><td class="num">300</td><td>Nghiên cứu/chuyên đề hoặc tình huống tương đối phức tạp, cần chuyên môn sâu.</td></tr>
+                <tr><td><strong>Nhóm 4</strong></td><td class="num">400</td><td>Quy định, quy trình, kế hoạch, đề án có phạm vi toàn tỉnh hoặc tương đương.</td></tr>
+                <tr><td><strong>Nhóm 5</strong></td><td class="num">500</td><td>Dự báo, hoạch định chiến lược, chuyên sâu đa lĩnh vực cấp bộ/ngành/tỉnh.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rule-note">Không tính số lần hoàn thiện do thay đổi chủ trương, yêu cầu của cấp có thẩm quyền hoặc nguyên nhân khách quan không thuộc trách nhiệm cá nhân.</div>
+        </div>
+        <div class="rule-stack">
+          <div class="card">
+            <h3 class="section-band">Điểm B – Chất lượng</h3>
+            <div class="table-wrap"><table><thead><tr><th>Số lần sửa nội dung</th><th class="num">Điểm B</th></tr></thead><tbody>
+              <tr><td>0 lần</td><td class="num">100%</td></tr><tr><td>1 lần</td><td class="num">75%</td></tr>
+              <tr><td>2 lần</td><td class="num">50%</td></tr><tr><td>3 lần</td><td class="num">25%</td></tr>
+              <tr><td>Từ 4 lần/không chấp nhận</td><td class="num">0%</td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="card">
+            <h3 class="section-band">Điểm C – Tiến độ</h3>
+            <div class="table-wrap"><table><thead><tr><th>Quy tắc</th><th class="num">Giá trị</th></tr></thead><tbody>
+              <tr><td>Đúng/trước hạn</td><td class="num">100%</td></tr>
+              <tr><td>Mỗi ngày làm việc chậm giảm</td><td class="num">5%</td></tr>
+              <tr><td>Điểm C tối thiểu</td><td class="num">0%</td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+      </div>
+      <p class="footer-note">Nguồn: Hướng dẫn số 05 năm 2026, trang 7 đến 11.</p>
+    </section>
+  </main>
+
+  <section id="print-report" aria-hidden="true"></section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>/* fflate 0.7.4 · MIT · https://github.com/101arrowz/fflate */
+!function(f){typeof module!='undefined'&&typeof exports=='object'?module.exports=f():typeof define!='undefined'&&define.amd?define(f):(typeof self!='undefined'?self:this).fflate=f()}(function(){var _e={};"use strict";var t=(typeof module!='undefined'&&typeof exports=='object'?function(_f){"use strict";var e,t=";var __w=require('worker_threads');__w.parentPort.on('message',function(m){onmessage({data:m})}),postMessage=function(m,t){__w.parentPort.postMessage(m,t)},close=process.exit;self=global";try{e=require("worker_threads").Worker}catch(e){}exports.default=e?function(r,n,o,a,s){var u=!1,i=new e(r+t,{eval:!0}).on("error",(function(e){return s(e,null)})).on("message",(function(e){return s(null,e)})).on("exit",(function(e){e&&!u&&s(Error("exited with code "+e),null)}));return i.postMessage(o,a),i.terminate=function(){return u=!0,e.prototype.terminate.call(i)},i}:function(e,t,r,n,o){setImmediate((function(){return o(Error("async operations unsupported - update to Node 12+ (or Node 10-11 with the --experimental-worker CLI flag)"),null)}));var a=function(){};return{terminate:a,postMessage:a}};return _f}:function(_f){"use strict";var e={};_f.default=function(r,t,s,a,n){var o=new Worker(e[t]||(e[t]=URL.createObjectURL(new Blob([r+';addEventListener("error",function(e){e=e.error;postMessage({$e$:[e.message,e.code,e.stack]})})'],{type:"text/javascript"}))));return o.onmessage=function(e){var r=e.data,t=r.$e$;if(t){var s=Error(t[0]);s.code=t[1],s.stack=t[2],n(s,null)}else n(null,r)},o.postMessage(s,a),o};return _f})({}),n=Uint8Array,r=Uint16Array,e=Uint32Array,i=new n([0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0,0]),o=new n([0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,0,0]),a=new n([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]),s=function(t,n){for(var i=new r(31),o=0;o<31;++o)i[o]=n+=1<<t[o-1];var a=new e(i[30]);for(o=1;o<30;++o)for(var s=i[o];s<i[o+1];++s)a[s]=s-i[o]<<5|o;return[i,a]},u=s(i,2),f=u[0],h=u[1];f[28]=258,h[258]=28;for(var c=s(o,0),l=c[0],p=c[1],v=new r(32768),d=0;d<32768;++d){var g=(43690&d)>>>1|(21845&d)<<1;v[d]=((65280&(g=(61680&(g=(52428&g)>>>2|(13107&g)<<2))>>>4|(3855&g)<<4))>>>8|(255&g)<<8)>>>1}var y=function(t,n,e){for(var i=t.length,o=0,a=new r(n);o<i;++o)t[o]&&++a[t[o]-1];var s,u=new r(n);for(o=0;o<n;++o)u[o]=u[o-1]+a[o-1]<<1;if(e){s=new r(1<<n);var f=15-n;for(o=0;o<i;++o)if(t[o])for(var h=o<<4|t[o],c=n-t[o],l=u[t[o]-1]++<<c,p=l|(1<<c)-1;l<=p;++l)s[v[l]>>>f]=h}else for(s=new r(i),o=0;o<i;++o)t[o]&&(s[o]=v[u[t[o]-1]++]>>>15-t[o]);return s},m=new n(288);for(d=0;d<144;++d)m[d]=8;for(d=144;d<256;++d)m[d]=9;for(d=256;d<280;++d)m[d]=7;for(d=280;d<288;++d)m[d]=8;var w=new n(32);for(d=0;d<32;++d)w[d]=5;var x=y(m,9,0),b=y(m,9,1),z=y(w,5,0),k=y(w,5,1),M=function(t){for(var n=t[0],r=1;r<t.length;++r)t[r]>n&&(n=t[r]);return n},S=function(t,n,r){var e=n/8|0;return(t[e]|t[e+1]<<8)>>(7&n)&r},T=function(t,n){var r=n/8|0;return(t[r]|t[r+1]<<8|t[r+2]<<16)>>(7&n)},A=function(t){return(t+7)/8|0},E=function(t,i,o){(null==i||i<0)&&(i=0),(null==o||o>t.length)&&(o=t.length);var a=new(2==t.BYTES_PER_ELEMENT?r:4==t.BYTES_PER_ELEMENT?e:n)(o-i);return a.set(t.subarray(i,o)),a};_e.FlateErrorCode={UnexpectedEOF:0,InvalidBlockType:1,InvalidLengthLiteral:2,InvalidDistance:3,StreamFinished:4,NoStreamHandler:5,InvalidHeader:6,NoCallback:7,InvalidUTF8:8,ExtraFieldTooLong:9,InvalidDate:10,FilenameTooLong:11,StreamFinishing:12,InvalidZipData:13,UnknownCompressionMethod:14};var D=["unexpected EOF","invalid block type","invalid length/literal","invalid distance","stream finished","no stream handler",,"no callback","invalid UTF-8 data","extra field too long","date not in range 1980-2099","filename too long","stream finishing","invalid zip data"],C=function(t,n,r){var e=Error(n||D[t]);if(e.code=t,Error.captureStackTrace&&Error.captureStackTrace(e,C),!r)throw e;return e},U=function(t,r,e){var s=t.length;if(!s||e&&e.f&&!e.l)return r||new n(0);var u=!r||e,h=!e||e.i;e||(e={}),r||(r=new n(3*s));var c=function(t){var e=r.length;if(t>e){var i=new n(Math.max(2*e,t));i.set(r),r=i}},p=e.f||0,v=e.p||0,d=e.b||0,g=e.l,m=e.d,w=e.m,x=e.n,z=8*s;do{if(!g){p=S(t,v,1);var D=S(t,v+1,3);if(v+=3,!D){var U=t[(B=A(v)+4)-4]|t[B-3]<<8,I=B+U;if(I>s){h&&C(0);break}u&&c(d+U),r.set(t.subarray(B,I),d),e.b=d+=U,e.p=v=8*I,e.f=p;continue}if(1==D)g=b,m=k,w=9,x=5;else if(2==D){var F=S(t,v,31)+257,Z=S(t,v+10,15)+4,O=F+S(t,v+5,31)+1;v+=14;for(var G=new n(O),L=new n(19),N=0;N<Z;++N)L[a[N]]=S(t,v+3*N,7);v+=3*Z;var P=M(L),_=(1<<P)-1,q=y(L,P,1);for(N=0;N<O;){var B,H=q[S(t,v,_)];if(v+=15&H,(B=H>>>4)<16)G[N++]=B;else{var Y=0,j=0;for(16==B?(j=3+S(t,v,3),v+=2,Y=G[N-1]):17==B?(j=3+S(t,v,7),v+=3):18==B&&(j=11+S(t,v,127),v+=7);j--;)G[N++]=Y}}var R=G.subarray(0,F),J=G.subarray(F);w=M(R),x=M(J),g=y(R,w,1),m=y(J,x,1)}else C(1);if(v>z){h&&C(0);break}}u&&c(d+131072);for(var K=(1<<w)-1,Q=(1<<x)-1,V=v;;V=v){var W=(Y=g[T(t,v)&K])>>>4;if((v+=15&Y)>z){h&&C(0);break}if(Y||C(2),W<256)r[d++]=W;else{if(256==W){V=v,g=null;break}var X=W-254;W>264&&(X=S(t,v,(1<<(nt=i[N=W-257]))-1)+f[N],v+=nt);var $=m[T(t,v)&Q],tt=$>>>4;if($||C(3),v+=15&$,J=l[tt],tt>3){var nt=o[tt];J+=T(t,v)&(1<<nt)-1,v+=nt}if(v>z){h&&C(0);break}u&&c(d+131072);for(var rt=d+X;d<rt;d+=4)r[d]=r[d-J],r[d+1]=r[d+1-J],r[d+2]=r[d+2-J],r[d+3]=r[d+3-J];d=rt}}e.l=g,e.p=V,e.b=d,e.f=p,g&&(p=1,e.m=w,e.d=m,e.n=x)}while(!p);return d==r.length?r:E(r,0,d)},I=function(t,n,r){var e=n/8|0;t[e]|=r<<=7&n,t[e+1]|=r>>>8},F=function(t,n,r){var e=n/8|0;t[e]|=r<<=7&n,t[e+1]|=r>>>8,t[e+2]|=r>>>16},Z=function(t,e){for(var i=[],o=0;o<t.length;++o)t[o]&&i.push({s:o,f:t[o]});var a=i.length,s=i.slice();if(!a)return[q,0];if(1==a){var u=new n(i[0].s+1);return u[i[0].s]=1,[u,1]}i.sort((function(t,n){return t.f-n.f})),i.push({s:-1,f:25001});var f=i[0],h=i[1],c=0,l=1,p=2;for(i[0]={s:-1,f:f.f+h.f,l:f,r:h};l!=a-1;)f=i[i[c].f<i[p].f?c++:p++],h=i[c!=l&&i[c].f<i[p].f?c++:p++],i[l++]={s:-1,f:f.f+h.f,l:f,r:h};var v=s[0].s;for(o=1;o<a;++o)s[o].s>v&&(v=s[o].s);var d=new r(v+1),g=O(i[l-1],d,0);if(g>e){o=0;var y=0,m=g-e,w=1<<m;for(s.sort((function(t,n){return d[n.s]-d[t.s]||t.f-n.f}));o<a;++o){var x=s[o].s;if(!(d[x]>e))break;y+=w-(1<<g-d[x]),d[x]=e}for(y>>>=m;y>0;){var b=s[o].s;d[b]<e?y-=1<<e-d[b]++-1:++o}for(;o>=0&&y;--o){var z=s[o].s;d[z]==e&&(--d[z],++y)}g=e}return[new n(d),g]},O=function(t,n,r){return-1==t.s?Math.max(O(t.l,n,r+1),O(t.r,n,r+1)):n[t.s]=r},G=function(t){for(var n=t.length;n&&!t[--n];);for(var e=new r(++n),i=0,o=t[0],a=1,s=function(t){e[i++]=t},u=1;u<=n;++u)if(t[u]==o&&u!=n)++a;else{if(!o&&a>2){for(;a>138;a-=138)s(32754);a>2&&(s(a>10?a-11<<5|28690:a-3<<5|12305),a=0)}else if(a>3){for(s(o),--a;a>6;a-=6)s(8304);a>2&&(s(a-3<<5|8208),a=0)}for(;a--;)s(o);a=1,o=t[u]}return[e.subarray(0,i),n]},L=function(t,n){for(var r=0,e=0;e<n.length;++e)r+=t[e]*n[e];return r},N=function(t,n,r){var e=r.length,i=A(n+2);t[i]=255&e,t[i+1]=e>>>8,t[i+2]=255^t[i],t[i+3]=255^t[i+1];for(var o=0;o<e;++o)t[i+o+4]=r[o];return 8*(i+4+e)},P=function(t,n,e,s,u,f,h,c,l,p,v){I(n,v++,e),++u[256];for(var d=Z(u,15),g=d[0],b=d[1],k=Z(f,15),M=k[0],S=k[1],T=G(g),A=T[0],E=T[1],D=G(M),C=D[0],U=D[1],O=new r(19),P=0;P<A.length;++P)O[31&A[P]]++;for(P=0;P<C.length;++P)O[31&C[P]]++;for(var _=Z(O,7),q=_[0],B=_[1],H=19;H>4&&!q[a[H-1]];--H);var Y,j,R,J,K=p+5<<3,Q=L(u,m)+L(f,w)+h,V=L(u,g)+L(f,M)+h+14+3*H+L(O,q)+(2*O[16]+3*O[17]+7*O[18]);if(K<=Q&&K<=V)return N(n,v,t.subarray(l,l+p));if(I(n,v,1+(V<Q)),v+=2,V<Q){Y=y(g,b,0),j=g,R=y(M,S,0),J=M;var W=y(q,B,0);for(I(n,v,E-257),I(n,v+5,U-1),I(n,v+10,H-4),v+=14,P=0;P<H;++P)I(n,v+3*P,q[a[P]]);v+=3*H;for(var X=[A,C],$=0;$<2;++$){var tt=X[$];for(P=0;P<tt.length;++P)I(n,v,W[nt=31&tt[P]]),v+=q[nt],nt>15&&(I(n,v,tt[P]>>>5&127),v+=tt[P]>>>12)}}else Y=x,j=m,R=z,J=w;for(P=0;P<c;++P)if(s[P]>255){var nt;F(n,v,Y[257+(nt=s[P]>>>18&31)]),v+=j[nt+257],nt>7&&(I(n,v,s[P]>>>23&31),v+=i[nt]);var rt=31&s[P];F(n,v,R[rt]),v+=J[rt],rt>3&&(F(n,v,s[P]>>>5&8191),v+=o[rt])}else F(n,v,Y[s[P]]),v+=j[s[P]];return F(n,v,Y[256]),v+j[256]},_=new e([65540,131080,131088,131104,262176,1048704,1048832,2114560,2117632]),q=new n(0),B=function(t,a,s,u,f,c){var l=t.length,v=new n(u+l+5*(1+Math.ceil(l/7e3))+f),d=v.subarray(u,v.length-f),g=0;if(!a||l<8)for(var y=0;y<=l;y+=65535){var m=y+65535;m>=l&&(d[g>>3]=c),g=N(d,g+1,t.subarray(y,m))}else{for(var w=_[a-1],x=w>>>13,b=8191&w,z=(1<<s)-1,k=new r(32768),M=new r(z+1),S=Math.ceil(s/3),T=2*S,D=function(n){return(t[n]^t[n+1]<<S^t[n+2]<<T)&z},C=new e(25e3),U=new r(288),I=new r(32),F=0,Z=0,O=(y=0,0),G=0,L=0;y<l;++y){var B=D(y),H=32767&y,Y=M[B];if(k[H]=Y,M[B]=H,G<=y){var j=l-y;if((F>7e3||O>24576)&&j>423){g=P(t,d,0,C,U,I,Z,O,L,y-L,g),O=F=Z=0,L=y;for(var R=0;R<286;++R)U[R]=0;for(R=0;R<30;++R)I[R]=0}var J=2,K=0,Q=b,V=H-Y&32767;if(j>2&&B==D(y-V))for(var W=Math.min(x,j)-1,X=Math.min(32767,y),$=Math.min(258,j);V<=X&&--Q&&H!=Y;){if(t[y+J]==t[y+J-V]){for(var tt=0;tt<$&&t[y+tt]==t[y+tt-V];++tt);if(tt>J){if(J=tt,K=V,tt>W)break;var nt=Math.min(V,tt-2),rt=0;for(R=0;R<nt;++R){var et=y-V+R+32768&32767,it=et-k[et]+32768&32767;it>rt&&(rt=it,Y=et)}}}V+=(H=Y)-(Y=k[H])+32768&32767}if(K){C[O++]=268435456|h[J]<<18|p[K];var ot=31&h[J],at=31&p[K];Z+=i[ot]+o[at],++U[257+ot],++I[at],G=y+J,++F}else C[O++]=t[y],++U[t[y]]}}g=P(t,d,c,C,U,I,Z,O,L,y-L,g),!c&&7&g&&(g=N(d,g+1,q))}return E(v,0,u+A(g)+f)},H=function(){for(var t=new Int32Array(256),n=0;n<256;++n){for(var r=n,e=9;--e;)r=(1&r&&-306674912)^r>>>1;t[n]=r}return t}(),Y=function(){var t=-1;return{p:function(n){for(var r=t,e=0;e<n.length;++e)r=H[255&r^n[e]]^r>>>8;t=r},d:function(){return~t}}},j=function(){var t=1,n=0;return{p:function(r){for(var e=t,i=n,o=0|r.length,a=0;a!=o;){for(var s=Math.min(a+2655,o);a<s;++a)i+=e+=r[a];e=(65535&e)+15*(e>>16),i=(65535&i)+15*(i>>16)}t=e,n=i},d:function(){return(255&(t%=65521))<<24|t>>>8<<16|(255&(n%=65521))<<8|n>>>8}}},R=function(t,n,r,e,i){return B(t,null==n.level?6:n.level,null==n.mem?Math.ceil(1.5*Math.max(8,Math.min(13,Math.log(t.length)))):12+n.mem,r,e,!i)},J=function(t,n){var r={};for(var e in t)r[e]=t[e];for(var e in n)r[e]=n[e];return r},K=function(t,n,r){for(var e=t(),i=""+t,o=i.slice(i.indexOf("[")+1,i.lastIndexOf("]")).replace(/\s+/g,"").split(","),a=0;a<e.length;++a){var s=e[a],u=o[a];if("function"==typeof s){n+=";"+u+"=";var f=""+s;if(s.prototype)if(-1!=f.indexOf("[native code]")){var h=f.indexOf(" ",8)+1;n+=f.slice(h,f.indexOf("(",h))}else for(var c in n+=f,s.prototype)n+=";"+u+".prototype."+c+"="+s.prototype[c];else n+=f}else r[u]=s}return[n,r]},Q=[],V=function(t){var n=[];for(var r in t)t[r].buffer&&n.push((t[r]=new t[r].constructor(t[r])).buffer);return n},W=function(n,r,e,i){var o;if(!Q[e]){for(var a="",s={},u=n.length-1,f=0;f<u;++f)a=(o=K(n[f],a,s))[0],s=o[1];Q[e]=K(n[u],a,s)}var h=J({},Q[e][1]);return t.default(Q[e][0]+";onmessage=function(e){for(var k in e.data)self[k]=e.data[k];onmessage="+r+"}",e,h,V(h),i)},X=function(){return[n,r,e,i,o,a,f,l,b,k,v,D,y,M,S,T,A,E,C,U,At,it,ot]},$=function(){return[n,r,e,i,o,a,h,p,x,m,z,w,v,_,q,y,I,F,Z,O,G,L,N,P,A,E,B,R,kt,it]},tt=function(){return[pt,gt,lt,Y,H]},nt=function(){return[vt,dt]},rt=function(){return[yt,lt,j]},et=function(){return[mt]},it=function(t){return postMessage(t,[t.buffer])},ot=function(t){return t&&t.size&&new n(t.size)},at=function(t,n,r,e,i,o){var a=W(r,e,i,(function(t,n){a.terminate(),o(t,n)}));return a.postMessage([t,n],n.consume?[t.buffer]:[]),function(){a.terminate()}},st=function(t){return t.ondata=function(t,n){return postMessage([t,n],[t.buffer])},function(n){return t.push(n.data[0],n.data[1])}},ut=function(t,n,r,e,i){var o,a=W(t,e,i,(function(t,r){t?(a.terminate(),n.ondata.call(n,t)):(r[1]&&a.terminate(),n.ondata.call(n,t,r[0],r[1]))}));a.postMessage(r),n.push=function(t,r){n.ondata||C(5),o&&n.ondata(C(4,0,1),null,!!r),a.postMessage([t,o=r],[t.buffer])},n.terminate=function(){a.terminate()}},ft=function(t,n){return t[n]|t[n+1]<<8},ht=function(t,n){return(t[n]|t[n+1]<<8|t[n+2]<<16|t[n+3]<<24)>>>0},ct=function(t,n){return ht(t,n)+4294967296*ht(t,n+4)},lt=function(t,n,r){for(;r;++n)t[n]=r,r>>>=8},pt=function(t,n){var r=n.filename;if(t[0]=31,t[1]=139,t[2]=8,t[8]=n.level<2?4:9==n.level?2:0,t[9]=3,0!=n.mtime&&lt(t,4,Math.floor(new Date(n.mtime||Date.now())/1e3)),r){t[3]=8;for(var e=0;e<=r.length;++e)t[e+10]=r.charCodeAt(e)}},vt=function(t){31==t[0]&&139==t[1]&&8==t[2]||C(6,"invalid gzip data");var n=t[3],r=10;4&n&&(r+=t[10]|2+(t[11]<<8));for(var e=(n>>3&1)+(n>>4&1);e>0;e-=!t[r++]);return r+(2&n)},dt=function(t){var n=t.length;return(t[n-4]|t[n-3]<<8|t[n-2]<<16|t[n-1]<<24)>>>0},gt=function(t){return 10+(t.filename&&t.filename.length+1||0)},yt=function(t,n){var r=n.level,e=0==r?0:r<6?1:9==r?3:2;t[0]=120,t[1]=e<<6|(e?32-2*e:1)},mt=function(t){(8!=(15&t[0])||t[0]>>>4>7||(t[0]<<8|t[1])%31)&&C(6,"invalid zlib data"),32&t[1]&&C(6,"invalid zlib data: preset dictionaries not supported")};function wt(t,n){return n||"function"!=typeof t||(n=t,t={}),this.ondata=n,t}var xt=function(){function t(t,n){n||"function"!=typeof t||(n=t,t={}),this.ondata=n,this.o=t||{}}return t.prototype.p=function(t,n){this.ondata(R(t,this.o,0,0,!n),n)},t.prototype.push=function(t,n){this.ondata||C(5),this.d&&C(4),this.d=n,this.p(t,n||!1)},t}();_e.Deflate=xt;var bt=function(){return function(t,n){ut([$,function(){return[st,xt]}],this,wt.call(this,t,n),(function(t){var n=new xt(t.data);onmessage=st(n)}),6)}}();function zt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&C(7),at(t,n,[$],(function(t){return it(kt(t.data[0],t.data[1]))}),0,r)}function kt(t,n){return R(t,n||{},0,0)}_e.AsyncDeflate=bt,_e.deflate=zt,_e.deflateSync=kt;var Mt=function(){function t(t){this.s={},this.p=new n(0),this.ondata=t}return t.prototype.e=function(t){this.ondata||C(5),this.d&&C(4);var r=this.p.length,e=new n(r+t.length);e.set(this.p),e.set(t,r),this.p=e},t.prototype.c=function(t){this.d=this.s.i=t||!1;var n=this.s.b,r=U(this.p,this.o,this.s);this.ondata(E(r,n,this.s.b),this.d),this.o=E(r,this.s.b-32768),this.s.b=this.o.length,this.p=E(this.p,this.s.p/8|0),this.s.p&=7},t.prototype.push=function(t,n){this.e(t),this.c(n)},t}();_e.Inflate=Mt;var St=function(){return function(t){this.ondata=t,ut([X,function(){return[st,Mt]}],this,0,(function(){var t=new Mt;onmessage=st(t)}),7)}}();function Tt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&C(7),at(t,n,[X],(function(t){return it(At(t.data[0],ot(t.data[1])))}),1,r)}function At(t,n){return U(t,n)}_e.AsyncInflate=St,_e.inflate=Tt,_e.inflateSync=At;var Et=function(){function t(t,n){this.c=Y(),this.l=0,this.v=1,xt.call(this,t,n)}return t.prototype.push=function(t,n){xt.prototype.push.call(this,t,n)},t.prototype.p=function(t,n){this.c.p(t),this.l+=t.length;var r=R(t,this.o,this.v&&gt(this.o),n&&8,!n);this.v&&(pt(r,this.o),this.v=0),n&&(lt(r,r.length-8,this.c.d()),lt(r,r.length-4,this.l)),this.ondata(r,n)},t}();_e.Gzip=Et,_e.Compress=Et;var Dt=function(){return function(t,n){ut([$,tt,function(){return[st,xt,Et]}],this,wt.call(this,t,n),(function(t){var n=new Et(t.data);onmessage=st(n)}),8)}}();function Ct(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&C(7),at(t,n,[$,tt,function(){return[Ut]}],(function(t){return it(Ut(t.data[0],t.data[1]))}),2,r)}function Ut(t,n){n||(n={});var r=Y(),e=t.length;r.p(t);var i=R(t,n,gt(n),8),o=i.length;return pt(i,n),lt(i,o-8,r.d()),lt(i,o-4,e),i}_e.AsyncGzip=Dt,_e.AsyncCompress=Dt,_e.gzip=Ct,_e.compress=Ct,_e.gzipSync=Ut,_e.compressSync=Ut;var It=function(){function t(t){this.v=1,Mt.call(this,t)}return t.prototype.push=function(t,n){if(Mt.prototype.e.call(this,t),this.v){var r=this.p.length>3?vt(this.p):4;if(r>=this.p.length&&!n)return;this.p=this.p.subarray(r),this.v=0}n&&(this.p.length<8&&C(6,"invalid gzip data"),this.p=this.p.subarray(0,-8)),Mt.prototype.c.call(this,n)},t}();_e.Gunzip=It;var Ft=function(){return function(t){this.ondata=t,ut([X,nt,function(){return[st,Mt,It]}],this,0,(function(){var t=new It;onmessage=st(t)}),9)}}();function Zt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&C(7),at(t,n,[X,nt,function(){return[Ot]}],(function(t){return it(Ot(t.data[0]))}),3,r)}function Ot(t,r){return U(t.subarray(vt(t),-8),r||new n(dt(t)))}_e.AsyncGunzip=Ft,_e.gunzip=Zt,_e.gunzipSync=Ot;var Gt=function(){function t(t,n){this.c=j(),this.v=1,xt.call(this,t,n)}return t.prototype.push=function(t,n){xt.prototype.push.call(this,t,n)},t.prototype.p=function(t,n){this.c.p(t);var r=R(t,this.o,this.v&&2,n&&4,!n);this.v&&(yt(r,this.o),this.v=0),n&&lt(r,r.length-4,this.c.d()),this.ondata(r,n)},t}();_e.Zlib=Gt;var Lt=function(){return function(t,n){ut([$,rt,function(){return[st,xt,Gt]}],this,wt.call(this,t,n),(function(t){var n=new Gt(t.data);onmessage=st(n)}),10)}}();function Nt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&C(7),at(t,n,[$,rt,function(){return[Pt]}],(function(t){return it(Pt(t.data[0],t.data[1]))}),4,r)}function Pt(t,n){n||(n={});var r=j();r.p(t);var e=R(t,n,2,4);return yt(e,n),lt(e,e.length-4,r.d()),e}_e.AsyncZlib=Lt,_e.zlib=Nt,_e.zlibSync=Pt;var _t=function(){function t(t){this.v=1,Mt.call(this,t)}return t.prototype.push=function(t,n){if(Mt.prototype.e.call(this,t),this.v){if(this.p.length<2&&!n)return;this.p=this.p.subarray(2),this.v=0}n&&(this.p.length<4&&C(6,"invalid zlib data"),this.p=this.p.subarray(0,-4)),Mt.prototype.c.call(this,n)},t}();_e.Unzlib=_t;var qt=function(){return function(t){this.ondata=t,ut([X,et,function(){return[st,Mt,_t]}],this,0,(function(){var t=new _t;onmessage=st(t)}),11)}}();function Bt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&C(7),at(t,n,[X,et,function(){return[Ht]}],(function(t){return it(Ht(t.data[0],ot(t.data[1])))}),5,r)}function Ht(t,n){return U((mt(t),t.subarray(2,-4)),n)}_e.AsyncUnzlib=qt,_e.unzlib=Bt,_e.unzlibSync=Ht;var Yt=function(){function t(t){this.G=It,this.I=Mt,this.Z=_t,this.ondata=t}return t.prototype.push=function(t,r){if(this.ondata||C(5),this.s)this.s.push(t,r);else{if(this.p&&this.p.length){var e=new n(this.p.length+t.length);e.set(this.p),e.set(t,this.p.length)}else this.p=t;if(this.p.length>2){var i=this,o=function(){i.ondata.apply(i,arguments)};this.s=31==this.p[0]&&139==this.p[1]&&8==this.p[2]?new this.G(o):8!=(15&this.p[0])||this.p[0]>>4>7||(this.p[0]<<8|this.p[1])%31?new this.I(o):new this.Z(o),this.s.push(this.p,r),this.p=null}}},t}();_e.Decompress=Yt;var jt=function(){function t(t){this.G=Ft,this.I=St,this.Z=qt,this.ondata=t}return t.prototype.push=function(t,n){Yt.prototype.push.call(this,t,n)},t}();function Rt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&C(7),31==t[0]&&139==t[1]&&8==t[2]?Zt(t,n,r):8!=(15&t[0])||t[0]>>4>7||(t[0]<<8|t[1])%31?Tt(t,n,r):Bt(t,n,r)}function Jt(t,n){return 31==t[0]&&139==t[1]&&8==t[2]?Ot(t,n):8!=(15&t[0])||t[0]>>4>7||(t[0]<<8|t[1])%31?At(t,n):Ht(t,n)}_e.AsyncDecompress=jt,_e.decompress=Rt,_e.decompressSync=Jt;var Kt=function(t,r,e,i){for(var o in t){var a=t[o],s=r+o,u=i;Array.isArray(a)&&(u=J(i,a[1]),a=a[0]),a instanceof n?e[s]=[a,u]:(e[s+="/"]=[new n(0),u],Kt(a,s,e,i))}},Qt="undefined"!=typeof TextEncoder&&new TextEncoder,Vt="undefined"!=typeof TextDecoder&&new TextDecoder,Wt=0;try{Vt.decode(q,{stream:!0}),Wt=1}catch(t){}var Xt=function(t){for(var n="",r=0;;){var e=t[r++],i=(e>127)+(e>223)+(e>239);if(r+i>t.length)return[n,E(t,r-1)];i?3==i?(e=((15&e)<<18|(63&t[r++])<<12|(63&t[r++])<<6|63&t[r++])-65536,n+=String.fromCharCode(55296|e>>10,56320|1023&e)):n+=String.fromCharCode(1&i?(31&e)<<6|63&t[r++]:(15&e)<<12|(63&t[r++])<<6|63&t[r++]):n+=String.fromCharCode(e)}},$t=function(){function t(t){this.ondata=t,Wt?this.t=new TextDecoder:this.p=q}return t.prototype.push=function(t,r){if(this.ondata||C(5),r=!!r,this.t)return this.ondata(this.t.decode(t,{stream:!0}),r),void(r&&(this.t.decode().length&&C(8),this.t=null));this.p||C(4);var e=new n(this.p.length+t.length);e.set(this.p),e.set(t,this.p.length);var i=Xt(e),o=i[0],a=i[1];r?(a.length&&C(8),this.p=null):this.p=a,this.ondata(o,r)},t}();_e.DecodeUTF8=$t;var tn=function(){function t(t){this.ondata=t}return t.prototype.push=function(t,n){this.ondata||C(5),this.d&&C(4),this.ondata(nn(t),this.d=n||!1)},t}();function nn(t,r){if(r){for(var e=new n(t.length),i=0;i<t.length;++i)e[i]=t.charCodeAt(i);return e}if(Qt)return Qt.encode(t);var o=t.length,a=new n(t.length+(t.length>>1)),s=0,u=function(t){a[s++]=t};for(i=0;i<o;++i){if(s+5>a.length){var f=new n(s+8+(o-i<<1));f.set(a),a=f}var h=t.charCodeAt(i);h<128||r?u(h):h<2048?(u(192|h>>6),u(128|63&h)):h>55295&&h<57344?(u(240|(h=65536+(1047552&h)|1023&t.charCodeAt(++i))>>18),u(128|h>>12&63),u(128|h>>6&63),u(128|63&h)):(u(224|h>>12),u(128|h>>6&63),u(128|63&h))}return E(a,0,s)}function rn(t,n){if(n){for(var r="",e=0;e<t.length;e+=16384)r+=String.fromCharCode.apply(null,t.subarray(e,e+16384));return r}if(Vt)return Vt.decode(t);var i=Xt(t),o=i[0];return i[1].length&&C(8),o}_e.EncodeUTF8=tn,_e.strToU8=nn,_e.strFromU8=rn;var en=function(t){return 1==t?3:t<6?2:9==t?1:0},on=function(t,n){return n+30+ft(t,n+26)+ft(t,n+28)},an=function(t,n,r){var e=ft(t,n+28),i=rn(t.subarray(n+46,n+46+e),!(2048&ft(t,n+8))),o=n+46+e,a=ht(t,n+20),s=r&&4294967295==a?sn(t,o):[a,ht(t,n+24),ht(t,n+42)],u=s[0],f=s[1],h=s[2];return[ft(t,n+10),u,f,i,o+ft(t,n+30)+ft(t,n+32),h]},sn=function(t,n){for(;1!=ft(t,n);n+=4+ft(t,n+2));return[ct(t,n+12),ct(t,n+4),ct(t,n+20)]},un=function(t){var n=0;if(t)for(var r in t){var e=t[r].length;e>65535&&C(9),n+=e+4}return n},fn=function(t,n,r,e,i,o,a,s){var u=e.length,f=r.extra,h=s&&s.length,c=un(f);lt(t,n,null!=a?33639248:67324752),n+=4,null!=a&&(t[n++]=20,t[n++]=r.os),t[n]=20,n+=2,t[n++]=r.flag<<1|(o<0&&8),t[n++]=i&&8,t[n++]=255&r.compression,t[n++]=r.compression>>8;var l=new Date(null==r.mtime?Date.now():r.mtime),p=l.getFullYear()-1980;if((p<0||p>119)&&C(10),lt(t,n,p<<25|l.getMonth()+1<<21|l.getDate()<<16|l.getHours()<<11|l.getMinutes()<<5|l.getSeconds()>>>1),n+=4,-1!=o&&(lt(t,n,r.crc),lt(t,n+4,o<0?-o-2:o),lt(t,n+8,r.size)),lt(t,n+12,u),lt(t,n+14,c),n+=16,null!=a&&(lt(t,n,h),lt(t,n+6,r.attrs),lt(t,n+10,a),n+=14),t.set(e,n),n+=u,c)for(var v in f){var d=f[v],g=d.length;lt(t,n,+v),lt(t,n+2,g),t.set(d,n+4),n+=4+g}return h&&(t.set(s,n),n+=h),n},hn=function(t,n,r,e,i){lt(t,n,101010256),lt(t,n+8,r),lt(t,n+10,r),lt(t,n+12,e),lt(t,n+16,i)},cn=function(){function t(t){this.filename=t,this.c=Y(),this.size=0,this.compression=0}return t.prototype.process=function(t,n){this.ondata(null,t,n)},t.prototype.push=function(t,n){this.ondata||C(5),this.c.p(t),this.size+=t.length,n&&(this.crc=this.c.d()),this.process(t,n||!1)},t}();_e.ZipPassThrough=cn;var ln=function(){function t(t,n){var r=this;n||(n={}),cn.call(this,t),this.d=new xt(n,(function(t,n){r.ondata(null,t,n)})),this.compression=8,this.flag=en(n.level)}return t.prototype.process=function(t,n){try{this.d.push(t,n)}catch(t){this.ondata(t,null,n)}},t.prototype.push=function(t,n){cn.prototype.push.call(this,t,n)},t}();_e.ZipDeflate=ln;var pn=function(){function t(t,n){var r=this;n||(n={}),cn.call(this,t),this.d=new bt(n,(function(t,n,e){r.ondata(t,n,e)})),this.compression=8,this.flag=en(n.level),this.terminate=this.d.terminate}return t.prototype.process=function(t,n){this.d.push(t,n)},t.prototype.push=function(t,n){cn.prototype.push.call(this,t,n)},t}();_e.AsyncZipDeflate=pn;var vn=function(){function t(t){this.ondata=t,this.u=[],this.d=1}return t.prototype.add=function(t){var r=this;if(this.ondata||C(5),2&this.d)this.ondata(C(4+8*(1&this.d),0,1),null,!1);else{var e=nn(t.filename),i=e.length,o=t.comment,a=o&&nn(o),s=i!=t.filename.length||a&&o.length!=a.length,u=i+un(t.extra)+30;i>65535&&this.ondata(C(11,0,1),null,!1);var f=new n(u);fn(f,0,t,e,s,-1);var h=[f],c=function(){for(var t=0,n=h;t<n.length;t++)r.ondata(null,n[t],!1);h=[]},l=this.d;this.d=0;var p=this.u.length,v=J(t,{f:e,u:s,o:a,t:function(){t.terminate&&t.terminate()},r:function(){if(c(),l){var t=r.u[p+1];t?t.r():r.d=1}l=1}}),d=0;t.ondata=function(e,i,o){if(e)r.ondata(e,i,o),r.terminate();else if(d+=i.length,h.push(i),o){var a=new n(16);lt(a,0,134695760),lt(a,4,t.crc),lt(a,8,d),lt(a,12,t.size),h.push(a),v.c=d,v.b=u+d+16,v.crc=t.crc,v.size=t.size,l&&v.r(),l=1}else l&&c()},this.u.push(v)}},t.prototype.end=function(){var t=this;2&this.d?this.ondata(C(4+8*(1&this.d),0,1),null,!0):(this.d?this.e():this.u.push({r:function(){1&t.d&&(t.u.splice(-1,1),t.e())},t:function(){}}),this.d=3)},t.prototype.e=function(){for(var t=0,r=0,e=0,i=0,o=this.u;i<o.length;i++)e+=46+(f=o[i]).f.length+un(f.extra)+(f.o?f.o.length:0);for(var a=new n(e+22),s=0,u=this.u;s<u.length;s++){var f;fn(a,t,f=u[s],f.f,f.u,-f.c-2,r,f.o),t+=46+f.f.length+un(f.extra)+(f.o?f.o.length:0),r+=f.b}hn(a,t,this.u.length,e,r),this.ondata(null,a,!0),this.d=2},t.prototype.terminate=function(){for(var t=0,n=this.u;t<n.length;t++)n[t].t();this.d=2},t}();function dn(t,r,e){e||(e=r,r={}),"function"!=typeof e&&C(7);var i={};Kt(t,"",i,r);var o=Object.keys(i),a=o.length,s=0,u=0,f=a,h=Array(a),c=[],l=function(){for(var t=0;t<c.length;++t)c[t]()},p=function(t,n){bn((function(){e(t,n)}))};bn((function(){p=e}));var v=function(){var t=new n(u+22),r=s,e=u-s;u=0;for(var i=0;i<f;++i){var o=h[i];try{var a=o.c.length;fn(t,u,o,o.f,o.u,a);var c=30+o.f.length+un(o.extra),l=u+c;t.set(o.c,l),fn(t,s,o,o.f,o.u,a,u,o.m),s+=16+c+(o.m?o.m.length:0),u=l+a}catch(t){return p(t,null)}}hn(t,s,h.length,e,r),p(null,t)};a||v();for(var d=function(t){var n=o[t],r=i[n],e=r[0],f=r[1],d=Y(),g=e.length;d.p(e);var y=nn(n),m=y.length,w=f.comment,x=w&&nn(w),b=x&&x.length,z=un(f.extra),k=0==f.level?0:8,M=function(r,e){if(r)l(),p(r,null);else{var i=e.length;h[t]=J(f,{size:g,crc:d.d(),c:e,f:y,m:x,u:m!=n.length||x&&w.length!=b,compression:k}),s+=30+m+z+i,u+=76+2*(m+z)+(b||0)+i,--a||v()}};if(m>65535&&M(C(11,0,1),null),k)if(g<16e4)try{M(null,kt(e,f))}catch(t){M(t,null)}else c.push(zt(e,f,M));else M(null,e)},g=0;g<f;++g)d(g);return l}function gn(t,r){r||(r={});var e={},i=[];Kt(t,"",e,r);var o=0,a=0;for(var s in e){var u=e[s],f=u[0],h=u[1],c=0==h.level?0:8,l=(M=nn(s)).length,p=h.comment,v=p&&nn(p),d=v&&v.length,g=un(h.extra);l>65535&&C(11);var y=c?kt(f,h):f,m=y.length,w=Y();w.p(f),i.push(J(h,{size:f.length,crc:w.d(),c:y,f:M,m:v,u:l!=s.length||v&&p.length!=d,o:o,compression:c})),o+=30+l+g+m,a+=76+2*(l+g)+(d||0)+m}for(var x=new n(a+22),b=o,z=a-o,k=0;k<i.length;++k){var M;fn(x,(M=i[k]).o,M,M.f,M.u,M.c.length);var S=30+M.f.length+un(M.extra);x.set(M.c,M.o+S),fn(x,o,M,M.f,M.u,M.c.length,M.o,M.m),o+=16+S+(M.m?M.m.length:0)}return hn(x,o,i.length,z,b),x}_e.Zip=vn,_e.zip=dn,_e.zipSync=gn;var yn=function(){function t(){}return t.prototype.push=function(t,n){this.ondata(null,t,n)},t.compression=0,t}();_e.UnzipPassThrough=yn;var mn=function(){function t(){var t=this;this.i=new Mt((function(n,r){t.ondata(null,n,r)}))}return t.prototype.push=function(t,n){try{this.i.push(t,n)}catch(t){this.ondata(t,null,n)}},t.compression=8,t}();_e.UnzipInflate=mn;var wn=function(){function t(t,n){var r=this;n<32e4?this.i=new Mt((function(t,n){r.ondata(null,t,n)})):(this.i=new St((function(t,n,e){r.ondata(t,n,e)})),this.terminate=this.i.terminate)}return t.prototype.push=function(t,n){this.i.terminate&&(t=E(t,0)),this.i.push(t,n)},t.compression=8,t}();_e.AsyncUnzipInflate=wn;var xn=function(){function t(t){this.onfile=t,this.k=[],this.o={0:yn},this.p=q}return t.prototype.push=function(t,r){var e=this;if(this.onfile||C(5),this.p||C(4),this.c>0){var i=Math.min(this.c,t.length),o=t.subarray(0,i);if(this.c-=i,this.d?this.d.push(o,!this.c):this.k[0].push(o),(t=t.subarray(i)).length)return this.push(t,r)}else{var a=0,s=0,u=void 0,f=void 0;this.p.length?t.length?((f=new n(this.p.length+t.length)).set(this.p),f.set(t,this.p.length)):f=this.p:f=t;for(var h=f.length,c=this.c,l=c&&this.d,p=function(){var t,n=ht(f,s);if(67324752==n){a=1,u=s,v.d=null,v.c=0;var r=ft(f,s+6),i=ft(f,s+8),o=2048&r,l=8&r,p=ft(f,s+26),d=ft(f,s+28);if(h>s+30+p+d){var g=[];v.k.unshift(g),a=2;var y,m=ht(f,s+18),w=ht(f,s+22),x=rn(f.subarray(s+30,s+=30+p),!o);4294967295==m?(t=l?[-2]:sn(f,s),m=t[0],w=t[1]):l&&(m=-1),s+=d,v.c=m;var b={name:x,compression:i,start:function(){if(b.ondata||C(5),m){var t=e.o[i];t||b.ondata(C(14,"unknown compression type "+i,1),null,!1),(y=m<0?new t(x):new t(x,m,w)).ondata=function(t,n,r){b.ondata(t,n,r)};for(var n=0,r=g;n<r.length;n++)y.push(r[n],!1);e.k[0]==g&&e.c?e.d=y:y.push(q,!0)}else b.ondata(null,q,!0)},terminate:function(){y&&y.terminate&&y.terminate()}};m>=0&&(b.size=m,b.originalSize=w),v.onfile(b)}return"break"}if(c){if(134695760==n)return u=s+=12+(-2==c&&8),a=3,v.c=0,"break";if(33639248==n)return u=s-=4,a=3,v.c=0,"break"}},v=this;s<h-4&&"break"!==p();++s);if(this.p=q,c<0){var d=f.subarray(0,a?u-12-(-2==c&&8)-(134695760==ht(f,u-16)&&4):s);l?l.push(d,!!a):this.k[+(2==a)].push(d)}if(2&a)return this.push(f.subarray(s),r);this.p=f.subarray(s)}r&&(this.c&&C(13),this.p=null)},t.prototype.register=function(t){this.o[t.compression]=t},t}();_e.Unzip=xn;var bn="function"==typeof queueMicrotask?queueMicrotask:"function"==typeof setTimeout?setTimeout:function(t){t()};function zn(t,r,e){e||(e=r,r={}),"function"!=typeof e&&C(7);var i=[],o=function(){for(var t=0;t<i.length;++t)i[t]()},a={},s=function(t,n){bn((function(){e(t,n)}))};bn((function(){s=e}));for(var u=t.length-22;101010256!=ht(t,u);--u)if(!u||t.length-u>65558)return s(C(13,0,1),null),o;var f=ft(t,u+8);if(f){var h=f,c=ht(t,u+16),l=4294967295==c||65535==h;if(l){var p=ht(t,u-12);(l=101075792==ht(t,p))&&(h=f=ht(t,p+32),c=ht(t,p+48))}for(var v=r&&r.filter,d=function(r){var e=an(t,c,l),u=e[0],h=e[1],p=e[2],d=e[3],g=e[4],y=on(t,e[5]);c=g;var m=function(t,n){t?(o(),s(t,null)):(n&&(a[d]=n),--f||s(null,a))};if(!v||v({name:d,size:h,originalSize:p,compression:u}))if(u)if(8==u){var w=t.subarray(y,y+h);if(h<32e4)try{m(null,At(w,new n(p)))}catch(t){m(t,null)}else i.push(Tt(w,{size:p},m))}else m(C(14,"unknown compression type "+u,1),null);else m(null,E(t,y,y+h));else m(null,null)},g=0;g<h;++g)d()}else s(null,{});return o}function kn(t,r){for(var e={},i=t.length-22;101010256!=ht(t,i);--i)(!i||t.length-i>65558)&&C(13);var o=ft(t,i+8);if(!o)return{};var a=ht(t,i+16),s=4294967295==a||65535==o;if(s){var u=ht(t,i-12);(s=101075792==ht(t,u))&&(o=ht(t,u+32),a=ht(t,u+48))}for(var f=r&&r.filter,h=0;h<o;++h){var c=an(t,a,s),l=c[0],p=c[1],v=c[2],d=c[3],g=c[4],y=on(t,c[5]);a=g,f&&!f({name:d,size:p,originalSize:v,compression:l})||(l?8==l?e[d]=At(t.subarray(y,y+p),new n(v)):C(14,"unknown compression type "+l):e[d]=E(t,y,y+p))}return e}_e.unzip=zn,_e.unzipSync=kn;return _e});
+(() => {
+  "use strict";
+
+  const TASK_TEMPLATE_XLSX_BASE64 = "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";
+
+  const STORAGE_KEY = "kpi_hd05_offline_v4_empty_original";
+  const MAX_TASKS = 100;
+  const MAX_RESULTS = 500;
+  const GROUP_MAX = { 1: 100, 2: 200, 3: 300, 4: 400, 5: 500 };
+  const TASK_TYPES = ["Theo chức năng, nhiệm vụ được giao", "Trọng tâm, then chốt"];
+  const AXES = [
+    null,
+    { short: "Kinh tế - xã hội và nhiệm vụ chính trị", full: "Thực hiện mục tiêu phát triển kinh tế - xã hội và nhiệm vụ chính trị được giao" },
+    { short: "Thể chế, phân cấp, kiểm tra, giám sát", full: "Hoàn thiện thể chế, đẩy mạnh phân cấp, phân quyền gắn với kiểm tra, giám sát" },
+    { short: "Khoa học, công nghệ, đổi mới và chuyển đổi số", full: "Thúc đẩy phát triển khoa học, công nghệ, đổi mới sáng tạo và chuyển đổi số" },
+    { short: "Xây dựng Đảng, hệ thống chính trị và phòng, chống tiêu cực", full: "Xây dựng Đảng và hệ thống chính trị trong sạch, vững mạnh; giữ gìn đoàn kết, thống nhất nội bộ; phòng, chống tham nhũng, lãng phí, tiêu cực" },
+    { short: "Văn hóa, con người và an sinh xã hội", full: "Phát triển văn hóa, con người, bảo đảm an sinh xã hội, nâng cao đời sống nhân dân" },
+    { short: "Quốc phòng, an ninh, đối ngoại và hội nhập", full: "Củng cố quốc phòng, an ninh, giữ vững ổn định chính trị - xã hội, nâng cao hiệu quả đối ngoại và hội nhập quốc tế" }
+  ];
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => [...document.querySelectorAll(selector)];
+  const uid = (prefix) => prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  })[char]);
+  const toNumber = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+  const fmt = new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt0 = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 });
+  const fmt1 = new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtPct = (value, digits = 2) => new Intl.NumberFormat("vi-VN", {
+    style: "percent", minimumFractionDigits: digits, maximumFractionDigits: digits
+  }).format(Number.isFinite(value) ? value : 0);
+
+  function makeExampleState() {
+    const task = {
+      id: "task-example", code: "NV01", name: "Cập nhật hồ sơ lý lịch cán bộ, viên chức, người lao động",
+      axis: 1, objective: "Nâng cao chất lượng quản lý đội ngũ", keyResult: "Hoàn thành chuẩn hóa hồ sơ đúng tiến độ",
+      output: "01 Bộ Hồ sơ giấy", deadline: "30/9/2026", type: TASK_TYPES[0], group: 1,
+      unitScore: 100, planned: 1
+    };
+    const results = [{
+      id: "result-example-1",
+      taskCode: "NV01",
+      productNo: 1,
+      status: "Hoàn thành",
+      revisions: 0,
+      delay: 0,
+      note: "Đúng hạn, đạt ngay"
+    }];
+    return {
+      version: 3,
+      profile: {
+        name: "",
+        unit: "",
+        period: "",
+        scale: "90"
+      },
+      tasks: [task],
+      results,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function makeEmptyState() {
+    return {
+      version: 3,
+      profile: { name: "", unit: "", period: "", scale: "90" },
+      tasks: [],
+      results: [],
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function normalizeState(raw) {
+    if (!raw || typeof raw !== "object") throw new Error("Dữ liệu không hợp lệ.");
+    const profile = raw.profile && typeof raw.profile === "object" ? raw.profile : {};
+    const tasks = Array.isArray(raw.tasks) ? raw.tasks.slice(0, MAX_TASKS).map((task) => ({
+      id: String(task.id || uid("task")),
+      code: String(task.code || "").trim().toUpperCase(),
+      name: String(task.name || "").trim(),
+      axis: Math.min(6, Math.max(1, Math.trunc(toNumber(task.axis, 1)))),
+      objective: String(task.objective || "").trim(),
+      keyResult: String(task.keyResult || "").trim(),
+      output: String(task.output || "").trim(),
+      deadline: String(task.deadline || "").trim(),
+      type: TASK_TYPES.includes(task.type) ? task.type : TASK_TYPES[0],
+      group: Math.min(5, Math.max(1, Math.trunc(toNumber(task.group, 1)))),
+      unitScore: Math.max(0, toNumber(task.unitScore)),
+      planned: Math.max(0, Math.trunc(toNumber(task.planned)))
+    })) : [];
+    const results = Array.isArray(raw.results) ? raw.results.slice(0, MAX_RESULTS).map((item) => ({
+      id: String(item.id || uid("result")),
+      taskCode: String(item.taskCode || "").trim().toUpperCase(),
+      productNo: Math.max(1, Math.trunc(toNumber(item.productNo, 1))),
+      status: item.status === "Không hoàn thành" ? "Không hoàn thành" : "Hoàn thành",
+      revisions: Math.max(0, Math.trunc(toNumber(item.revisions))),
+      delay: Math.max(0, Math.trunc(toNumber(item.delay))),
+      note: String(item.note || "").trim()
+    })) : [];
+    return {
+      version: 3,
+      profile: {
+        name: String(profile.name || ""),
+        unit: String(profile.unit || ""),
+        period: String(profile.period || ""),
+        scale: String(profile.scale) === "100" ? "100" : "90"
+      },
+      tasks,
+      results,
+      updatedAt: raw.updatedAt || new Date().toISOString()
+    };
+  }
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? normalizeState(JSON.parse(saved)) : makeEmptyState();
+    } catch (error) {
+      return makeEmptyState();
+    }
+  }
+
+  let state = loadState();
+  let editingTaskId = null;
+  let editingResultId = null;
+  let toastTimer;
+
+  function persist(message) {
+    state.updatedAt = new Date().toISOString();
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      $("#save-label").textContent = "Đã tự lưu lúc " + new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    } catch (error) {
+      $("#save-label").textContent = "Trình duyệt không cho phép tự lưu — hãy Sao lưu";
+    }
+    if (message) showToast(message);
+  }
+
+  function showToast(message, isError = false) {
+    const toast = $("#toast");
+    toast.textContent = message;
+    toast.classList.toggle("error", isError);
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+  }
+
+  function scoreB(result) {
+    return result.status === "Hoàn thành" ? Math.max(0, 1 - Math.min(result.revisions, 4) * 0.25) : 0;
+  }
+  function scoreC(result) {
+    return result.status === "Hoàn thành" ? Math.max(0, 1 - result.delay * 0.05) : 0;
+  }
+  function resultsFor(task) {
+    return state.results.filter((item) => item.taskCode === task.code);
+  }
+  function calculateTask(task) {
+    const all = resultsFor(task);
+    const completedRows = all.filter((item) => item.status === "Hoàn thành");
+    const completed = completedRows.length;
+    const planned = Math.max(0, task.planned);
+    const a = planned > 0 ? Math.min(completed / planned, 1) : 0;
+    const b = completed > 0 ? completedRows.reduce((sum, item) => sum + scoreB(item), 0) / completed : 0;
+    const c = completed > 0 ? completedRows.reduce((sum, item) => sum + scoreC(item), 0) / completed : 0;
+    const kpi = (a + b + c) / 3;
+    const standard = planned * task.unitScore;
+    const quantityScore = a * standard;
+    const qualityScore = b * standard;
+    const progressScore = c * standard;
+    const actual = kpi * standard;
+    return { completed, a, b, c, kpi, standard, quantityScore, qualityScore, progressScore, actual, extra: Math.max(completed - planned, 0) };
+  }
+
+  function taskCheck(task) {
+    const duplicate = state.tasks.filter((item) => item.code === task.code).length > 1;
+    if (duplicate) return { text: "TRÙNG MÃ", level: "bad" };
+    if (!Number.isInteger(task.axis) || task.axis < 1 || task.axis > 6) return { text: "TRỤC KHÔNG HỢP LỆ", level: "bad" };
+    if (task.unitScore < 0 || task.unitScore > GROUP_MAX[task.group]) return { text: "ĐIỂM VƯỢT KHUNG", level: "bad" };
+    if (!Number.isInteger(task.planned) || task.planned < 0) return { text: "SỐ LƯỢNG KHÔNG HỢP LỆ", level: "warn" };
+    if (!task.code || !task.name || !task.output) return { text: "THIẾU THÔNG TIN", level: "warn" };
+    return { text: "OK", level: "good" };
+  }
+  function resultCheck(result) {
+    if (!state.tasks.some((task) => task.code === result.taskCode)) return { text: "MÃ KHÔNG TỒN TẠI", level: "bad" };
+    if (!Number.isInteger(result.productNo) || result.productNo <= 0) return { text: "SỐ SP KHÔNG HỢP LỆ", level: "bad" };
+    if (result.revisions < 0 || result.delay < 0) return { text: "DỮ LIỆU ÂM", level: "bad" };
+    if (!Number.isInteger(result.revisions) || !Number.isInteger(result.delay)) return { text: "PHẢI NHẬP SỐ NGUYÊN", level: "warn" };
+    return { text: "OK", level: "good" };
+  }
+  function allWarnings() {
+    const warnings = [];
+    state.tasks.forEach((task) => {
+      const check = taskCheck(task);
+      if (check.text !== "OK") warnings.push("Nhiệm vụ " + (task.code || "(chưa có mã)") + ": " + check.text + ".");
+    });
+    state.results.forEach((result, index) => {
+      const check = resultCheck(result);
+      if (check.text !== "OK") warnings.push("Kết quả SP dòng " + (index + 1) + ": " + check.text + ".");
+    });
+    if (state.profile.scale === "100" && !state.tasks.some((task) => task.type === TASK_TYPES[1])) {
+      warnings.push("Đã chọn thang 100 nhưng chưa có nhiệm vụ trọng tâm, then chốt.");
+    }
+    if (state.profile.scale === "90" && state.tasks.some((task) => task.type === TASK_TYPES[1])) {
+      warnings.push("Có nhiệm vụ trọng tâm, then chốt nhưng đang chọn thang 90; nhóm này chưa được tính vào điểm cuối.");
+    }
+    return warnings;
+  }
+  function summarizeCalculations(rows) {
+    const standard = rows.reduce((sum, item) => sum + item.standard, 0);
+    const quantityScore = rows.reduce((sum, item) => sum + item.quantityScore, 0);
+    const qualityScore = rows.reduce((sum, item) => sum + item.qualityScore, 0);
+    const progressScore = rows.reduce((sum, item) => sum + item.progressScore, 0);
+    const actual = rows.reduce((sum, item) => sum + item.actual, 0);
+    const kpi = standard > 0 ? Math.min((quantityScore + qualityScore + progressScore) / (standard * 3), 1) : 0;
+    return { standard, quantityScore, qualityScore, progressScore, actual, kpi };
+  }
+  function summaryData() {
+    const calculations = state.tasks.map((task) => ({ task, ...calculateTask(task) }));
+    const scale = toNumber(state.profile.scale, 90);
+    const typeA = summarizeCalculations(calculations.filter((item) => item.task.type === TASK_TYPES[0]));
+    const typeB = summarizeCalculations(calculations.filter((item) => item.task.type === TASK_TYPES[1]));
+    const eligible = scale === 100 ? calculations : calculations.filter((item) => item.task.type === TASK_TYPES[0]);
+    const planned = eligible.reduce((sum, item) => sum + item.task.planned, 0);
+    const completed = eligible.reduce((sum, item) => sum + item.completed, 0);
+    const extra = eligible.reduce((sum, item) => sum + item.extra, 0);
+    const standard = eligible.reduce((sum, item) => sum + item.standard, 0);
+    const actual = eligible.reduce((sum, item) => sum + item.actual, 0);
+    const scaleScore = scale === 100 ? typeA.kpi * 90 + typeB.kpi * 10 : typeA.kpi * 90;
+    const kpi = scale > 0 ? scaleScore / scale : 0;
+    return { calculations, planned, completed, extra, standard, actual, kpi, scale, scaleScore, typeA, typeB };
+  }
+
+  const TASK_IMPORT_HEADERS = {
+    code: ["ma nv", "ma nhiem vu", "ma cong viec"],
+    axis: ["truc", "truc ket qua", "truc ket qua trong tam"],
+    objective: ["muc tieu", "muc tieu trong tam", "muc tieu trong tam then chot"],
+    keyResult: ["ket qua trong tam", "ket qua then chot", "ket qua trong tam then chot"],
+    name: ["ten nhiem vu", "ten cong viec", "nhiem vu"],
+    output: ["san pham dau ra", "san pham", "ket qua dau ra"],
+    deadline: ["tien do de ra", "thoi han", "han hoan thanh"],
+    type: ["loai nhiem vu", "loai cong viec", "loai"],
+    group: ["nhom", "nhom nhiem vu", "nhom cong viec"],
+    unitScore: ["diem quy doi sp", "diem quy doi san pham", "diem kpi", "diem sp"],
+    planned: ["sl ke hoach", "so luong ke hoach", "so luong dang ky", "sl dang ky"]
+  };
+
+  function normalizeHeader(value) {
+    return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function parseExcelNumber(value) {
+    if (typeof value === "number") return value;
+    let text = String(value ?? "").trim().replace(/\s+/g, "");
+    if (!text) return NaN;
+    if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(text)) text = text.replace(/\./g, "").replace(",", ".");
+    else if (/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(text)) text = text.replace(/,/g, "");
+    else if (text.includes(",") && !text.includes(".")) text = text.replace(",", ".");
+    return Number(text);
+  }
+  function decodeXml(value) {
+    return String(value ?? "")
+      .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+      .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(parseInt(code, 10)))
+      .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+  }
+  function xmlAttr(attributes, name) {
+    const safe = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = String(attributes).match(new RegExp("(?:^|\\s)" + safe + "\\s*=\\s*([\"'])([\\s\\S]*?)\\1", "i"));
+    return match ? decodeXml(match[2]) : "";
+  }
+  function xmlTextRuns(fragment) {
+    return [...String(fragment).matchAll(/<(?:[\w.-]+:)?t\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?t>/gi)].map((match) => decodeXml(match[1])).join("");
+  }
+  function zipPath(target) {
+    const raw = String(target || "").replace(/\\/g, "/");
+    const base = raw.startsWith("/") ? raw.slice(1) : raw.startsWith("xl/") ? raw : "xl/" + raw;
+    const parts = [];
+    base.split("/").forEach((part) => {
+      if (!part || part === ".") return;
+      if (part === "..") parts.pop(); else parts.push(part);
+    });
+    return parts.join("/");
+  }
+  function columnIndex(reference) {
+    const letters = String(reference || "").match(/[A-Z]+/i)?.[0]?.toUpperCase() || "A";
+    return [...letters].reduce((value, char) => value * 26 + char.charCodeAt(0) - 64, 0) - 1;
+  }
+  function parseWorksheet(xml, sharedStrings) {
+    const rows = [];
+    for (const rowMatch of String(xml).matchAll(/<(?:[\w.-]+:)?row\b([^>]*)>([\s\S]*?)<\/(?:[\w.-]+:)?row>/gi)) {
+      const row = [];
+      row.sourceRow = Math.max(1, Math.trunc(toNumber(xmlAttr(rowMatch[1], "r"), rows.length + 1)));
+      let sequentialColumn = 0;
+      const cellRegex = /<(?:[\w.-]+:)?c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:[\w.-]+:)?c>)/gi;
+      for (const cellMatch of rowMatch[2].matchAll(cellRegex)) {
+        const attributes = cellMatch[1] || "";
+        const body = cellMatch[2] || "";
+        const reference = xmlAttr(attributes, "r");
+        const index = reference ? columnIndex(reference) : sequentialColumn;
+        const type = xmlAttr(attributes, "t");
+        const valueMatch = body.match(/<(?:[\w.-]+:)?v\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?v>/i);
+        let value = "";
+        if (type === "inlineStr") value = xmlTextRuns(body);
+        else if (type === "s") value = sharedStrings[Math.trunc(toNumber(valueMatch?.[1], -1))] ?? "";
+        else if (type === "b") value = valueMatch?.[1] === "1" ? "TRUE" : "FALSE";
+        else value = decodeXml(valueMatch?.[1] ?? "");
+        row[index] = value;
+        sequentialColumn = index + 1;
+      }
+      rows.push(row);
+    }
+    return rows;
+  }
+  function parseXlsxSheets(buffer) {
+    if (!globalThis.fflate?.unzipSync) throw new Error("Thiếu bộ đọc tệp Excel trong bản offline.");
+    const archive = globalThis.fflate.unzipSync(new Uint8Array(buffer));
+    const read = (name) => archive[name] ? new TextDecoder("utf-8").decode(archive[name]) : "";
+    const sharedStrings = [...read("xl/sharedStrings.xml").matchAll(/<(?:[\w.-]+:)?si\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?si>/gi)]
+      .map((match) => xmlTextRuns(match[1]));
+    const workbook = read("xl/workbook.xml");
+    const relationships = read("xl/_rels/workbook.xml.rels");
+    const targets = new Map([...relationships.matchAll(/<(?:[\w.-]+:)?Relationship\b([^>]*)\/?\s*>/gi)]
+      .map((match) => [xmlAttr(match[1], "Id"), zipPath(xmlAttr(match[1], "Target"))]));
+    const sheets = [];
+    const used = new Set();
+    for (const match of workbook.matchAll(/<(?:[\w.-]+:)?sheet\b([^>]*)\/?\s*>/gi)) {
+      const target = targets.get(xmlAttr(match[1], "r:id"));
+      if (!target || !archive[target]) continue;
+      sheets.push({ name: xmlAttr(match[1], "name") || "Trang " + (sheets.length + 1), rows: parseWorksheet(read(target), sharedStrings) });
+      used.add(target);
+    }
+    Object.keys(archive).filter((name) => /^xl\/worksheets\/[^/]+\.xml$/i.test(name) && !used.has(name)).sort().forEach((name) => {
+      sheets.push({ name: "Trang " + (sheets.length + 1), rows: parseWorksheet(read(name), sharedStrings) });
+    });
+    if (!sheets.length) throw new Error("Không tìm thấy trang tính trong tệp XLSX.");
+    return sheets;
+  }
+  function parseDelimited(text, name = "Dữ liệu") {
+    const firstLine = String(text).split(/\r?\n/).find((line) => line.trim()) || "";
+    const counts = [["\t", (firstLine.match(/\t/g) || []).length], [";", (firstLine.match(/;/g) || []).length], [",", (firstLine.match(/,/g) || []).length]];
+    const delimiter = counts.sort((a, b) => b[1] - a[1])[0][0];
+    const rows = [];
+    let row = [], value = "", quoted = false;
+    const source = String(text).replace(/^\ufeff/, "");
+    for (let index = 0; index <= source.length; index += 1) {
+      const char = source[index] ?? "\n";
+      if (char === '"') {
+        if (quoted && source[index + 1] === '"') { value += '"'; index += 1; }
+        else quoted = !quoted;
+      } else if (char === delimiter && !quoted) {
+        row.push(value); value = "";
+      } else if ((char === "\n" || char === "\r") && !quoted) {
+        if (char === "\r" && source[index + 1] === "\n") index += 1;
+        row.push(value); value = "";
+        if (row.some((cell) => String(cell).trim())) rows.push(row);
+        row = [];
+      } else value += char;
+    }
+    rows.forEach((item, index) => { item.sourceRow = index + 1; });
+    return [{ name, rows }];
+  }
+  function parseHtmlTables(text) {
+    const document = new DOMParser().parseFromString(text, "text/html");
+    const sheets = [...document.querySelectorAll("table")].map((table, tableIndex) => ({
+      name: "Bảng " + (tableIndex + 1),
+      rows: [...table.querySelectorAll("tr")].map((tr, rowIndex) => {
+        const row = [...tr.querySelectorAll(":scope > th, :scope > td")].map((cell) => cell.textContent.trim());
+        row.sourceRow = rowIndex + 1;
+        return row;
+      })
+    }));
+    if (!sheets.length) throw new Error("Không tìm thấy bảng dữ liệu trong tệp XLS.");
+    return sheets;
+  }
+  function headerIndexes(row) {
+    const headers = row.map(normalizeHeader);
+    return Object.fromEntries(Object.entries(TASK_IMPORT_HEADERS).map(([key, aliases]) => [key,
+      headers.findIndex((header) => aliases.includes(header))
+    ]));
+  }
+  function parseTaskTable(rows) {
+    const required = ["code", "name", "output", "group", "unitScore", "planned"];
+    let headerRow = -1;
+    let indexes;
+    for (let index = 0; index < Math.min(rows.length, 40); index += 1) {
+      const candidate = headerIndexes(rows[index]);
+      if (required.every((key) => candidate[key] >= 0)) { headerRow = index; indexes = candidate; break; }
+    }
+    if (headerRow < 0) throw new Error("Không tìm thấy đủ các cột bắt buộc của danh mục nhiệm vụ.");
+    const tasks = [];
+    const errors = [];
+    const seen = new Set();
+    rows.slice(headerRow + 1).forEach((row, offset) => {
+      const rowNumber = row.sourceRow || headerRow + offset + 2;
+      const values = Object.fromEntries(Object.entries(indexes).map(([key, index]) => [key, index >= 0 ? String(row[index] ?? "").trim() : ""]));
+      if (!Object.values(values).some(Boolean)) return;
+      if (!values.code && !values.name && !values.output && !values.group && !values.unitScore && !values.planned) return;
+      const code = values.code.toUpperCase();
+      const groupMatch = values.group.match(/(?:^|\D)([1-5])(?:\D|$)/);
+      const group = groupMatch ? Number(groupMatch[1]) : NaN;
+      const axisMatch = values.axis.match(/(?:^|\D)([1-6])(?:\D|$)/);
+      const axis = axisMatch ? Number(axisMatch[1]) : 1;
+      const unitScore = parseExcelNumber(values.unitScore);
+      const planned = parseExcelNumber(values.planned);
+      const rowErrors = [];
+      if (!code) rowErrors.push("thiếu Mã NV");
+      if (code.length > 20) rowErrors.push("Mã NV dài quá 20 ký tự");
+      if (!values.name) rowErrors.push("thiếu Tên nhiệm vụ");
+      if (!values.output) rowErrors.push("thiếu Sản phẩm đầu ra");
+      if (!Number.isInteger(group) || group < 1 || group > 5) rowErrors.push("Nhóm phải từ 1 đến 5");
+      if (!Number.isFinite(unitScore) || unitScore < 0) rowErrors.push("Điểm KPI không hợp lệ");
+      else if (Number.isInteger(group) && unitScore > GROUP_MAX[group]) rowErrors.push("Điểm KPI vượt khung Nhóm " + group);
+      if (!Number.isInteger(planned) || planned < 0) rowErrors.push("SL kế hoạch phải là số nguyên không âm");
+      if (seen.has(code)) rowErrors.push("trùng Mã NV trong file");
+      if (rowErrors.length) { errors.push("Dòng " + rowNumber + ": " + rowErrors.join(", ")); return; }
+      seen.add(code);
+      const normalizedType = normalizeHeader(values.type);
+      tasks.push({
+        code, axis, objective: values.objective, keyResult: values.keyResult,
+        name: values.name, output: values.output, deadline: values.deadline,
+        type: normalizedType.includes("trong tam") || normalizedType.includes("then chot") ? TASK_TYPES[1] : TASK_TYPES[0],
+        group, unitScore, planned
+      });
+    });
+    return { tasks, errors, headerRow: rows[headerRow].sourceRow || headerRow + 1 };
+  }
+  function findTaskImport(sheets) {
+    const ordered = [...sheets].sort((a, b) => Number(!normalizeHeader(a.name).includes("danh muc")) - Number(!normalizeHeader(b.name).includes("danh muc")));
+    for (const sheet of ordered) {
+      try { return { ...parseTaskTable(sheet.rows), sheetName: sheet.name }; } catch (error) { /* thử trang tiếp theo */ }
+    }
+    throw new Error("Không tìm thấy trang có đủ các cột: Mã NV, Tên nhiệm vụ, Sản phẩm đầu ra, Nhóm, Điểm quy đổi/SP và SL kế hoạch.");
+  }
+  async function readTaskFile(file) {
+    if (file.size > 15 * 1024 * 1024) throw new Error("Tệp lớn hơn 15 MB. Hãy giữ lại riêng trang danh mục rồi thử lại.");
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    const name = file.name.toLowerCase();
+    if (name.endsWith(".xlsx") || (bytes[0] === 0x50 && bytes[1] === 0x4b)) return parseXlsxSheets(buffer);
+    if (bytes[0] === 0xd0 && bytes[1] === 0xcf && bytes[2] === 0x11 && bytes[3] === 0xe0) {
+      throw new Error("Định dạng XLS cũ chưa được hỗ trợ. Hãy mở tệp trong Excel và Lưu thành tệp .xlsx.");
+    }
+    const text = new TextDecoder("utf-8").decode(bytes);
+    if (/<table\b/i.test(text)) return parseHtmlTables(text);
+    return parseDelimited(text, file.name);
+  }
+  function setTaskImportStatus(message, type = "") {
+    const box = $("#task-excel-status");
+    box.textContent = message;
+    box.className = "excel-import-status" + (type ? " " + type : "");
+    box.hidden = !message;
+  }
+
+  function setActiveTab(name) {
+    $$(".tab-button").forEach((button) => button.classList.toggle("active", button.dataset.tab === name));
+    $$(".tab-panel").forEach((panel) => panel.hidden = panel.dataset.panel !== name);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function syncProfile() {
+    $("#profile-name").value = state.profile.name;
+    $("#profile-unit").value = state.profile.unit;
+    $("#profile-period").value = state.profile.period;
+    $("#profile-scale").value = state.profile.scale;
+  }
+
+  function renderSummary() {
+    const summary = summaryData();
+    const warnings = allWarnings();
+    $("#metric-tasks").textContent = fmt0.format(state.tasks.length);
+    $("#metric-planned").textContent = fmt0.format(summary.planned);
+    $("#metric-completed").textContent = fmt0.format(summary.completed);
+    $("#metric-completed-sub").textContent = fmt0.format(summary.extra) + " sản phẩm vượt kế hoạch";
+    $("#metric-kpi").textContent = fmtPct(summary.kpi);
+    $("#metric-standard").textContent = fmt.format(summary.standard);
+    $("#metric-actual").textContent = fmt.format(summary.actual);
+    $("#metric-scale").textContent = fmt1.format(summary.scaleScore);
+    $("#scale-label").textContent = state.profile.scale;
+    $("#metric-warnings").textContent = fmt0.format(warnings.length);
+    $("#warning-metric").classList.toggle("bad", warnings.length > 0);
+
+    $("#group-summary-body").innerHTML = [1,2,3,4,5].map((group) => {
+      const rows = summary.calculations.filter((item) => item.task.group === group);
+      const standard = rows.reduce((sum, item) => sum + item.standard, 0);
+      const actual = rows.reduce((sum, item) => sum + item.actual, 0);
+      const ratio = standard > 0 ? Math.min(actual / standard, 1) : 0;
+      return `<tr>
+        <td><strong>Nhóm ${group}</strong></td><td class="num">${rows.length}</td>
+        <td class="num">${fmt.format(standard)}</td><td class="num">${fmt.format(actual)}</td>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track"><div class="progress-bar" style="width:${Math.max(0, Math.min(100, ratio * 100))}%"></div></div><span>${fmtPct(ratio)}</span></div></td>
+      </tr>`;
+    }).join("");
+
+    $("#type-summary-body").innerHTML = TASK_TYPES.map((type, index) => {
+      const rows = summary.calculations.filter((item) => item.task.type === type);
+      const typeSummary = index === 0 ? summary.typeA : summary.typeB;
+      const maxPoint = index === 0 ? 90 : 10;
+      return `<tr><td>${esc(type)}</td><td class="num">${rows.length}</td>
+        <td class="num">${fmt.format(rows.reduce((sum, item) => sum + item.standard, 0))}</td>
+        <td class="num">${fmt.format(rows.reduce((sum, item) => sum + item.actual, 0))}</td>
+        <td class="num">${fmtPct(typeSummary.kpi)}</td><td class="num"><strong>${fmt.format(typeSummary.kpi * maxPoint)}</strong></td></tr>`;
+    }).join("");
+
+    $("#warning-box").innerHTML = warnings.length
+      ? `<div class="notice"><strong>Cần kiểm tra ${warnings.length} nội dung:</strong><ul class="warning-list" style="margin-top:8px">${warnings.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>`
+      : `<div class="notice success"><strong>Dữ liệu hợp lệ.</strong> Chưa phát hiện mã trùng, điểm vượt khung hoặc kết quả sản phẩm sai mã.</div>`;
+  }
+
+  function renderTasks() {
+    $("#task-count-tab").textContent = state.tasks.length;
+    $("#task-limit-badge").textContent = state.tasks.length + "/" + MAX_TASKS + " nhiệm vụ";
+    const body = $("#task-table-body");
+    if (!state.tasks.length) {
+      body.innerHTML = `<tr><td colspan="22" class="empty-cell">Chưa có nhiệm vụ. Hãy thêm nhiệm vụ ở biểu mẫu phía trên.</td></tr>`;
+      return;
+    }
+    body.innerHTML = state.tasks.map((task) => {
+      const calc = calculateTask(task);
+      const check = taskCheck(task);
+      return `<tr>
+        <td class="input-cell"><strong>${esc(task.code)}</strong></td>
+        <td class="input-cell"><strong>Trục ${task.axis}</strong></td><td class="input-cell">${esc(task.objective)}</td>
+        <td class="input-cell">${esc(task.keyResult)}</td><td class="input-cell">${esc(task.name)}</td>
+        <td class="input-cell">${esc(task.output)}</td><td class="input-cell">${esc(task.deadline)}</td>
+        <td class="input-cell">${esc(task.type)}</td><td class="input-cell">Nhóm ${task.group}</td>
+        <td class="num auto">${fmt.format(GROUP_MAX[task.group])}</td><td class="num input-cell">${fmt.format(task.unitScore)}</td>
+        <td class="num input-cell">${fmt0.format(task.planned)}</td><td class="num auto">${fmt0.format(calc.completed)}</td>
+        <td class="num auto">${fmtPct(calc.a)}</td><td class="num auto">${fmtPct(calc.b)}</td><td class="num auto">${fmtPct(calc.c)}</td>
+        <td class="num auto"><strong>${fmtPct(calc.kpi)}</strong></td><td class="num auto">${fmt.format(calc.standard)}</td>
+        <td class="num auto"><strong>${fmt.format(calc.actual)}</strong></td><td class="num auto">${fmt0.format(calc.extra)}</td>
+        <td><span class="badge ${check.level}">${esc(check.text)}</span></td>
+        <td class="no-print"><div class="action-cell">
+          <button type="button" class="btn btn-small" data-action="edit-task" data-id="${esc(task.id)}">Sửa</button>
+          <button type="button" class="btn btn-danger btn-small" data-action="delete-task" data-id="${esc(task.id)}">Xóa</button>
+        </div></td>
+      </tr>`;
+    }).join("");
+  }
+
+  function renderTaskSelect() {
+    const select = $("#result-task-code");
+    const selected = select.value;
+    select.innerHTML = state.tasks.length
+      ? state.tasks.map((task) => `<option value="${esc(task.code)}">${esc(task.code)} — ${esc(task.name)}</option>`).join("")
+      : `<option value="">Chưa có nhiệm vụ</option>`;
+    if (state.tasks.some((task) => task.code === selected)) select.value = selected;
+    updateResultOutput();
+  }
+  function renderResults() {
+    $("#result-count-tab").textContent = state.results.length;
+    $("#result-limit-badge").textContent = state.results.length + "/" + MAX_RESULTS + " sản phẩm";
+    $("#completed-badge").textContent = state.results.filter((item) => item.status === "Hoàn thành").length + " hoàn thành";
+    const body = $("#result-table-body");
+    if (!state.results.length) {
+      body.innerHTML = `<tr><td colspan="12" class="empty-cell">Chưa có kết quả sản phẩm. Hãy thêm từng sản phẩm ở biểu mẫu phía trên.</td></tr>`;
+      return;
+    }
+    body.innerHTML = state.results.map((result, index) => {
+      const task = state.tasks.find((item) => item.code === result.taskCode);
+      const check = resultCheck(result);
+      return `<tr>
+        <td class="num auto">${index + 1}</td><td class="input-cell"><strong>${esc(result.taskCode)}</strong></td>
+        <td class="num input-cell">${fmt0.format(result.productNo)}</td><td class="auto">${esc(task?.output || "Mã không tồn tại")}</td>
+        <td class="input-cell"><span class="badge ${result.status === "Hoàn thành" ? "good" : "bad"}">${esc(result.status)}</span></td>
+        <td class="num input-cell">${fmt0.format(result.revisions)}</td><td class="num auto">${fmtPct(scoreB(result), 0)}</td>
+        <td class="num input-cell">${fmt0.format(result.delay)}</td><td class="num auto">${fmtPct(scoreC(result), 0)}</td>
+        <td class="input-cell">${esc(result.note || "")}</td><td><span class="badge ${check.level}">${esc(check.text)}</span></td>
+        <td class="no-print"><div class="action-cell">
+          <button type="button" class="btn btn-small" data-action="edit-result" data-id="${esc(result.id)}">Sửa</button>
+          <button type="button" class="btn btn-danger btn-small" data-action="delete-result" data-id="${esc(result.id)}">Xóa</button>
+        </div></td>
+      </tr>`;
+    }).join("");
+  }
+  function renderAll() {
+    syncProfile();
+    renderSummary();
+    renderTasks();
+    renderTaskSelect();
+    renderResults();
+  }
+
+  function resetTaskForm() {
+    editingTaskId = null;
+    $("#task-form").reset();
+    $("#task-axis").value = "1";
+    $("#task-group").value = "1";
+    $("#task-unit-score").value = "";
+    $("#task-planned").value = "";
+    $("#task-form-title").textContent = "Thêm nhiệm vụ";
+    $("#task-submit").textContent = "Thêm nhiệm vụ";
+    $("#task-cancel").hidden = true;
+    updateGroupMax();
+  }
+  function updateGroupMax() {
+    const group = Math.trunc(toNumber($("#task-group").value, 1));
+    const max = GROUP_MAX[group];
+    $("#task-group-max").value = max;
+    $("#task-unit-score").max = max;
+    $("#task-score-hint").textContent = "Không vượt " + fmt0.format(max) + " điểm";
+  }
+  function editTask(id) {
+    const task = state.tasks.find((item) => item.id === id);
+    if (!task) return;
+    editingTaskId = id;
+    $("#task-code").value = task.code;
+    $("#task-axis").value = String(task.axis);
+    $("#task-objective").value = task.objective;
+    $("#task-key-result").value = task.keyResult;
+    $("#task-name").value = task.name;
+    $("#task-output").value = task.output;
+    $("#task-deadline").value = task.deadline;
+    $("#task-type").value = task.type;
+    $("#task-group").value = String(task.group);
+    $("#task-unit-score").value = task.unitScore;
+    $("#task-planned").value = task.planned;
+    $("#task-form-title").textContent = "Sửa nhiệm vụ " + task.code;
+    $("#task-submit").textContent = "Lưu thay đổi";
+    $("#task-cancel").hidden = false;
+    updateGroupMax();
+    $("#task-form").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function resetResultForm(keepTask = true) {
+    const currentTask = $("#result-task-code").value;
+    editingResultId = null;
+    $("#result-form").reset();
+    renderTaskSelect();
+    if (keepTask && state.tasks.some((task) => task.code === currentTask)) $("#result-task-code").value = currentTask;
+    const taskCode = $("#result-task-code").value;
+    $("#result-product-no").value = state.results.filter((item) => item.taskCode === taskCode).length + 1;
+    $("#result-revisions").value = "";
+    $("#result-delay").value = "";
+    $("#result-status").value = "Hoàn thành";
+    $("#result-form-title").textContent = "Thêm kết quả sản phẩm";
+    $("#result-submit").textContent = "Thêm sản phẩm";
+    $("#result-cancel").hidden = true;
+    updateResultOutput();
+  }
+  function updateResultOutput() {
+    const code = $("#result-task-code").value;
+    const task = state.tasks.find((item) => item.code === code);
+    $("#result-output").value = task ? task.output : "";
+  }
+  function editResult(id) {
+    const result = state.results.find((item) => item.id === id);
+    if (!result) return;
+    editingResultId = id;
+    renderTaskSelect();
+    $("#result-task-code").value = result.taskCode;
+    $("#result-product-no").value = result.productNo;
+    $("#result-status").value = result.status;
+    $("#result-revisions").value = result.revisions;
+    $("#result-delay").value = result.delay;
+    $("#result-note").value = result.note;
+    $("#result-form-title").textContent = "Sửa kết quả " + result.taskCode + " · SP " + result.productNo;
+    $("#result-submit").textContent = "Lưu thay đổi";
+    $("#result-cancel").hidden = false;
+    updateResultOutput();
+    $("#result-form").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+
+  function unitHeadTitle(unit) {
+    const raw = String(unit || "").trim().replace(/\s+/g, " ");
+    if (!raw) return "TRƯỞNG PHÒNG/KHOA";
+    const upper = raw.toLocaleUpperCase("vi-VN");
+    if (/^PHÒNG\b/i.test(raw)) return "TRƯỞNG " + upper;
+    if (/^KHOA\b/i.test(raw)) return "TRƯỞNG " + upper;
+    return "TRƯỞNG " + upper;
+  }
+
+  function printNumber(value, digits = 2) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "0";
+    return new Intl.NumberFormat("vi-VN", {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    }).format(n);
+  }
+
+  function renderPrintReport() {
+    const host = $("#print-report");
+    const summary = summaryData();
+    const sections = [
+      { type: TASK_TYPES[1], code: "A", title: "NHIỆM VỤ TRỌNG TÂM, THEN CHỐT (10 ĐIỂM)", maxPoint: 10, sum: summary.typeB },
+      { type: TASK_TYPES[0], code: "B", title: "NHIỆM VỤ THEO CHỨC NĂNG, NHIỆM VỤ ĐƯỢC GIAO (90 ĐIỂM)", maxPoint: 90, sum: summary.typeA }
+    ];
+
+    let serial = 0;
+    let body = "";
+    sections.forEach((section) => {
+      const sectionTasks = state.tasks.filter((task) => task.type === section.type);
+      if (!sectionTasks.length) return;
+
+      body += `<tr class="section-row"><td colspan="21">${section.code}. ${esc(section.title)}</td></tr>`;
+
+      const axesPresent = [...new Set(sectionTasks.map((task) => task.axis))].sort((a,b) => a-b);
+      axesPresent.forEach((axis) => {
+        const axisTasks = sectionTasks.filter((task) => task.axis === axis);
+        body += `<tr class="axis-row"><td colspan="21">TRỤC ${axis}. ${esc(AXES[axis].full)}</td></tr>`;
+
+        let axisStd = 0, axisQty = 0, axisQual = 0, axisProg = 0, axisActual = 0, axisCompleted = 0, axisPlan = 0;
+        axisTasks.forEach((task) => {
+          serial += 1;
+          const c = calculateTask(task);
+          axisStd += c.standard; axisQty += c.quantityScore; axisQual += c.qualityScore;
+          axisProg += c.progressScore; axisActual += c.actual; axisCompleted += c.completed; axisPlan += task.planned;
+
+          body += `<tr>
+            <td>${serial}</td>
+            <td class="text-left">${esc(task.objective)}</td>
+            <td class="text-left">${esc(task.keyResult)}</td>
+            <td class="text-left">${esc(task.code)}. ${esc(task.name)}</td>
+            <td class="text-left">${esc(task.output)}</td>
+            <td>${esc(task.deadline)}</td>
+            <td>Nhóm ${task.group}</td>
+            <td>${printNumber(task.unitScore, 0)}</td>
+            <td>${task.planned}</td>
+            <td>${printNumber(c.standard, 0)}</td>
+            <td>${c.completed}</td>
+            <td>${printNumber(c.quantityScore, 2)}</td>
+            <td class="text-left">${esc(revisionSummary(task))}</td>
+            <td>${printNumber(c.b, 2)}</td>
+            <td>${printNumber(c.qualityScore, 2)}</td>
+            <td class="text-left">${esc(delaySummary(task))}</td>
+            <td>${printNumber(c.c, 2)}</td>
+            <td>${printNumber(c.progressScore, 2)}</td>
+            <td>${printNumber(c.kpi, 2)}</td>
+            <td>${printNumber(c.actual, 2)}</td>
+            <td>${c.extra}</td>
+          </tr>`;
+        });
+
+        const axisKpi = axisStd > 0 ? (axisQty + axisQual + axisProg) / (axisStd * 3) : 0;
+        const axisB = axisStd > 0 ? axisQual / axisStd : 0;
+        const axisC = axisStd > 0 ? axisProg / axisStd : 0;
+        body += `<tr class="subtotal-row">
+          <td colspan="8" class="text-left">Tổng (Trục ${axis})</td>
+          <td>${axisPlan}</td><td>${printNumber(axisStd, 0)}</td><td>${axisCompleted}</td>
+          <td>${printNumber(axisQty, 2)}</td><td></td><td>${printNumber(axisB, 2)}</td>
+          <td>${printNumber(axisQual, 2)}</td><td></td><td>${printNumber(axisC, 2)}</td>
+          <td>${printNumber(axisProg, 2)}</td><td>${printNumber(axisKpi, 2)}</td>
+          <td>${printNumber(axisActual, 2)}</td><td></td>
+        </tr>`;
+      });
+
+      body += `<tr class="score-row">
+        <td colspan="18" class="text-left">ĐIỂM KPI (NHÓM ${section.code})</td>
+        <td>${fmtPct(section.sum.kpi)}</td>
+        <td colspan="2">${printNumber(section.sum.kpi * section.maxPoint, 2)}</td>
+      </tr>`;
+    });
+
+    const finalLabel = state.profile.scale === "100" ? "TỔNG ĐIỂM (A+B)" : "TỔNG ĐIỂM (NHÓM B)";
+    host.innerHTML = `
+      <div class="print-report-wrap">
+        <div class="print-title">BẢNG CHẤM ĐIỂM KẾT QUẢ THỰC HIỆN NHIỆM VỤ ${esc(reportPeriodTitle())}</div>
+        <div class="print-meta">
+          <strong>Họ và tên:</strong><span>${esc(state.profile.name)}</span>
+          <strong>Đơn vị:</strong><span>${esc(state.profile.unit)}</span>
+          <strong>Kỳ đánh giá:</strong><span>${esc(state.profile.period)}</span>
+          <strong>Thang điểm:</strong><span>${esc(state.profile.scale)}</span>
+        </div>
+
+        <table class="print-kpi-table">
+          <colgroup>
+            <col style="width:2.2%"><col style="width:6.2%"><col style="width:6.2%"><col style="width:8.7%"><col style="width:7.4%">
+            <col style="width:4.2%"><col style="width:4.4%"><col style="width:3.5%"><col style="width:3.5%"><col style="width:4.1%">
+            <col style="width:3.5%"><col style="width:4.1%"><col style="width:7%"><col style="width:3.6%"><col style="width:4.1%">
+            <col style="width:7%"><col style="width:3.6%"><col style="width:4.1%"><col style="width:3.7%"><col style="width:4.3%"><col style="width:3.5%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th rowspan="3" class="plan-head">TT</th>
+              <th colspan="9" class="plan-head">KẾ HOẠCH ĐỀ RA</th>
+              <th colspan="11" class="actual-head">THỰC TẾ TRIỂN KHAI</th>
+            </tr>
+            <tr>
+              <th rowspan="2" class="plan-head">Mục tiêu trọng tâm, then chốt</th>
+              <th rowspan="2" class="plan-head">Kết quả trọng tâm, then chốt</th>
+              <th rowspan="2" class="plan-head">Nhiệm vụ, công việc</th>
+              <th rowspan="2" class="plan-head">Sản phẩm</th>
+              <th rowspan="2" class="plan-head">Tiến độ đề ra</th>
+              <th rowspan="2" class="plan-head">Phân nhóm độ khó, phức tạp, phạm vi tác động</th>
+              <th rowspan="2" class="plan-head">Điểm theo danh mục</th>
+              <th rowspan="2" class="plan-head">Số lượng</th>
+              <th rowspan="2" class="plan-head">Tổng điểm quy đổi</th>
+
+              <th colspan="2" class="actual-head">KPI quy đổi về Số lượng</th>
+              <th colspan="3" class="actual-head">KPI quy đổi về Chất lượng</th>
+              <th colspan="3" class="actual-head">KPI quy đổi về Tiến độ</th>
+              <th rowspan="2" class="actual-head">KPI nhiệm vụ</th>
+              <th rowspan="2" class="actual-head">Tổng điểm quy đổi</th>
+              <th rowspan="2" class="actual-head">SP vượt</th>
+            </tr>
+            <tr>
+              <th class="actual-head">Thực tế hoàn thành</th><th class="actual-head">Quy đổi</th>
+              <th class="actual-head">Số lần yêu cầu hoàn thiện, chỉnh sửa</th><th class="actual-head">Thực tế hoàn thành</th><th class="actual-head">Quy đổi</th>
+              <th class="actual-head">Ngày hoàn thành / Tiến độ</th><th class="actual-head">Thực tế hoàn thành</th><th class="actual-head">Quy đổi</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${body}
+            <tr class="final-row"><td colspan="19" class="text-left">${finalLabel}</td><td colspan="2">${printNumber(summary.scaleScore, 2)}</td></tr>
+          </tbody>
+        </table>
+
+        <div class="print-date">Quảng Trị, ngày ..... tháng ..... năm ........</div>
+        <div class="print-signatures">
+          <div>
+            <div class="print-sign-title">${esc(unitHeadTitle(state.profile.unit))}</div>
+
+            <div class="print-sign-space"></div>
+          </div>
+          <div>
+            <div class="print-sign-title">CÁ NHÂN</div>
+
+            <div class="print-sign-space"></div>
+            <div class="print-sign-name">${esc(state.profile.name)}</div>
+          </div>
+        </div>
+        <div class="print-note">Chỉ hiển thị các trục có phát sinh nhiệm vụ của cá nhân; không bắt buộc mỗi cá nhân phải có đủ 06 trục.</div>
+      </div>`;
+  }
+
+  function base64ToBytes(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+    return bytes;
+  }
+
+  function downloadTaskTemplate() {
+    try {
+      downloadBlob(
+        base64ToBytes(TASK_TEMPLATE_XLSX_BASE64),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Bieu_mau_Danh_muc_KPI.xlsx"
+      );
+      showToast("Đã tải biểu mẫu Danh mục KPI. Điền dữ liệu rồi tải lại vào Tool.");
+    } catch (error) {
+      showToast("Không thể tạo tệp biểu mẫu Excel.", true);
+    }
+  }
+
+  function downloadBlob(content, mime, filename) {
+    const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
+  }
+  function fileStem() {
+    const raw = [state.profile.name, state.profile.period].filter(Boolean).join("_") || "Ket_qua_KPI";
+    return raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D")
+      .replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 70) || "Ket_qua_KPI";
+  }
+  function exportJson() {
+    downloadBlob("\ufeff" + JSON.stringify(state, null, 2), "application/json;charset=utf-8", fileStem() + "_sao_luu.json");
+    showToast("Đã tạo tệp sao lưu dữ liệu.");
+  }
+  function xlsxXml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;"
+    })[char]);
+  }
+  function xlsxColumnName(index) {
+    let value = Math.max(1, Math.trunc(index));
+    let name = "";
+    while (value > 0) {
+      value -= 1;
+      name = String.fromCharCode(65 + value % 26) + name;
+      value = Math.floor(value / 26);
+    }
+    return name;
+  }
+  function xlsxCell(row, item) {
+    const ref = xlsxColumnName(item.c) + row;
+    const style = ` s="${item.s || 0}"`;
+    if (item.f) {
+      const cached = Number.isFinite(Number(item.cache)) ? Number(item.cache) : 0;
+      return `<c r="${ref}"${style}><f>${xlsxXml(item.f)}</f><v>${cached}</v></c>`;
+    }
+    if (typeof item.v === "number" && Number.isFinite(item.v)) return `<c r="${ref}"${style}><v>${item.v}</v></c>`;
+    return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xlsxXml(item.v)}</t></is></c>`;
+  }
+  function xlsxRow(row, items, height) {
+    const heightXml = height ? ` ht="${height}" customHeight="1"` : "";
+    return `<row r="${row}"${heightXml}>${items.slice().sort((a, b) => a.c - b.c).map((item) => xlsxCell(row, item)).join("")}</row>`;
+  }
+  function reportPeriodTitle() {
+    const raw = String(state.profile.period || "").trim();
+    if (!raw) return "QUÝ … NĂM …";
+    const normalized = raw.replace(/\s*\/\s*(\d{4})\s*$/i, " NĂM $1");
+    return /^quý(?:\s|$)/i.test(normalized) ? normalized.toUpperCase() : ("QUÝ " + normalized).toUpperCase();
+  }
+  function revisionSummary(task) {
+    const rows = resultsFor(task).filter((item) => item.status === "Hoàn thành");
+    if (!rows.length) return "Chưa có sản phẩm hoàn thành";
+    const counts = new Map();
+    rows.forEach((item) => {
+      const key = Math.min(Math.max(0, item.revisions), 4);
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    const labels = ["đạt ngay", "sửa 1 lần", "sửa 2 lần", "sửa 3 lần", "sửa từ 4 lần"];
+    return [...counts.entries()].sort((a, b) => a[0] - b[0]).map(([key, count]) => `${count} SP ${labels[key]}`).join("; ");
+  }
+  function delaySummary(task) {
+    const rows = resultsFor(task).filter((item) => item.status === "Hoàn thành");
+    if (!rows.length) return "Chưa có sản phẩm hoàn thành";
+    const counts = new Map();
+    rows.forEach((item) => counts.set(item.delay, (counts.get(item.delay) || 0) + 1));
+    return [...counts.entries()].sort((a, b) => a[0] - b[0]).map(([days, count]) => days === 0 ? `${count} SP đúng hạn` : `${count} SP chậm ${days} ngày`).join("; ");
+  }
+  function xlsxStylesXml() {
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <numFmts count="3"><numFmt numFmtId="164" formatCode="#,##0.00"/><numFmt numFmtId="165" formatCode="0.00%"/><numFmt numFmtId="166" formatCode="#,##0"/></numFmts>
+  <fonts count="4">
+    <font><sz val="10"/><name val="Times New Roman"/><family val="1"/></font>
+    <font><b/><sz val="10"/><name val="Times New Roman"/><family val="1"/></font>
+    <font><b/><sz val="14"/><name val="Times New Roman"/><family val="1"/></font>
+    <font><i/><sz val="10"/><name val="Times New Roman"/><family val="1"/></font>
+  </fonts>
+  <fills count="8">
+    <fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFFCE4D6"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFDDEBF7"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFFFF2CC"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFE2F0D9"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFE7E6E6"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFDDEBF7"/><bgColor indexed="64"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border><left style="thin"><color rgb="FF595959"/></left><right style="thin"><color rgb="FF595959"/></right><top style="thin"><color rgb="FF595959"/></top><bottom style="thin"><color rgb="FF595959"/></bottom><diagonal/></border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="20">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top" wrapText="1"/></xf>
+    <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>
+    <xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="164" fontId="1" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>
+    <xf numFmtId="165" fontId="1" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="164" fontId="1" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>
+  </cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+  }
+  function buildDetailSheetXml() {
+    const rows = [];
+    rows.push(xlsxRow(1, ["STT", "Mã NV", "Số SP", "Sản phẩm", "Kết quả", "Số lần sửa", "Hệ số B", "Số ngày chậm", "Hệ số C", "Ghi chú"].map((value, index) => ({ c: index + 1, v: value, s: 6 })), 32));
+    state.results.forEach((item, index) => {
+      const row = index + 2;
+      const task = state.tasks.find((candidate) => candidate.code === item.taskCode);
+      rows.push(xlsxRow(row, [
+        { c: 1, v: index + 1, s: 19 }, { c: 2, v: item.taskCode, s: 9 }, { c: 3, v: item.productNo, s: 19 },
+        { c: 4, v: task?.output || "", s: 8 }, { c: 5, v: item.status, s: 9 }, { c: 6, v: item.revisions, s: 19 },
+        { c: 7, f: `IF(E${row}="Hoàn thành",MAX(0,1-MIN(F${row},4)*25%),0)`, cache: scoreB(item), s: 11 },
+        { c: 8, v: item.delay, s: 19 }, { c: 9, f: `IF(E${row}="Hoàn thành",MAX(0,1-H${row}*5%),0)`, cache: scoreC(item), s: 11 },
+        { c: 10, v: item.note, s: 8 }
+      ], 30));
+    });
+    const end = Math.max(1, state.results.length + 1);
+    const autoFilter = state.results.length ? `<autoFilter ref="A1:J${end}"/>` : "";
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <dimension ref="A1:J${end}"/><sheetViews><sheetView showGridLines="0" workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <sheetFormatPr defaultRowHeight="18"/><cols><col min="1" max="1" width="6" customWidth="1"/><col min="2" max="2" width="12" customWidth="1"/><col min="3" max="3" width="8" customWidth="1"/><col min="4" max="4" width="28" customWidth="1"/><col min="5" max="5" width="16" customWidth="1"/><col min="6" max="9" width="13" customWidth="1"/><col min="10" max="10" width="30" customWidth="1"/></cols>
+  <sheetData>${rows.join("")}</sheetData>${autoFilter}<pageMargins left="0.3" right="0.3" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>
+</worksheet>`;
+  }
+  function buildReportSheetXml() {
+    const rows = [];
+    const merges = [];
+    let row = 0;
+    const addRow = (items, height) => { row += 1; rows.push(xlsxRow(row, items, height)); return row; };
+    const filled = (style, count = 21) => Array.from({ length: count }, (_, index) => ({ c: index + 1, v: "", s: style }));
+    const set = (items, column, value, style, formula, cache) => {
+      items[column - 1] = { c: column, v: value ?? "", s: style ?? items[column - 1]?.s ?? 0, f: formula, cache };
+    };
+    const summary = summaryData();
+    const detailEnd = Math.max(2, state.results.length + 1);
+
+    addRow([{ c: 1, v: `BẢNG CHẤM ĐIỂM KẾT QUẢ THỰC HIỆN NHIỆM VỤ ${reportPeriodTitle()}`, s: 1 }], 30);
+    merges.push("A1:U1");
+    addRow([{ c: 1, v: "Họ và tên:", s: 2 }, { c: 4, v: state.profile.name, s: 3 }, { c: 11, v: "Đơn vị phòng/khoa:", s: 2 }, { c: 14, v: state.profile.unit, s: 3 }], 22);
+    merges.push("A2:C2", "D2:J2", "K2:M2", "N2:U2");
+    addRow([{ c: 1, v: "Kỳ đánh giá:", s: 2 }, { c: 4, v: state.profile.period, s: 3 }, { c: 11, v: "Ngày xuất bảng:", s: 2 }, { c: 14, v: new Date().toLocaleDateString("vi-VN"), s: 3 }], 22);
+    merges.push("A3:C3", "D3:J3", "K3:M3", "N3:U3");
+    addRow([], 8);
+
+    let header = filled(6);
+    for (let column = 12; column <= 21; column += 1) header[column - 1].s = 7;
+    set(header, 1, "TT", 6); set(header, 2, "KẾ HOẠCH ĐỀ RA", 6); set(header, 12, "THỰC TẾ TRIỂN KHAI", 7);
+    addRow(header, 25);
+    merges.push("A5:A7", "B5:K5", "L5:U5");
+
+    header = filled(6);
+    for (let column = 12; column <= 21; column += 1) header[column - 1].s = 7;
+    [
+      [2, "Trục kết quả"], [3, "Mục tiêu trọng tâm, then chốt"], [4, "Kết quả trọng tâm, then chốt"],
+      [5, "Nhiệm vụ, công việc"], [6, "Sản phẩm"], [7, "Tiến độ đề ra"],
+      [8, "Phân nhóm độ khó, phức tạp, phạm vi tác động"], [9, "Điểm/SP"], [10, "Số lượng kế hoạch"], [11, "Tổng điểm quy đổi"]
+    ].forEach(([column, value]) => set(header, column, value, 6));
+    set(header, 12, "KPI quy đổi về Số lượng", 7); set(header, 14, "KPI quy đổi về Chất lượng", 7);
+    set(header, 17, "KPI quy đổi về Tiến độ", 7); set(header, 20, "KPI nhiệm vụ", 7); set(header, 21, "Điểm thực hiện", 7);
+    addRow(header, 55);
+    merges.push("B6:B7", "C6:C7", "D6:D7", "E6:E7", "F6:F7", "G6:G7", "H6:H7", "I6:I7", "J6:J7", "K6:K7", "L6:M6", "N6:P6", "Q6:S6", "T6:T7", "U6:U7");
+
+    header = filled(6);
+    for (let column = 12; column <= 21; column += 1) header[column - 1].s = 7;
+    set(header, 12, "Thực tế hoàn thành", 7); set(header, 13, "Quy đổi", 7);
+    set(header, 14, "Kết quả chỉnh sửa", 7); set(header, 15, "Hệ số B", 7); set(header, 16, "Quy đổi", 7);
+    set(header, 17, "Kết quả tiến độ", 7); set(header, 18, "Hệ số C", 7); set(header, 19, "Quy đổi", 7);
+    addRow(header, 48);
+
+    let taskNumber = 0;
+    const groupScoreRows = [];
+    const sections = [
+      { type: TASK_TYPES[1], code: "A", title: "NHIỆM VỤ TRỌNG TÂM, THEN CHỐT (10 ĐIỂM)", maxPoint: 10, summary: summary.typeB },
+      { type: TASK_TYPES[0], code: "B", title: "NHIỆM VỤ THEO CHỨC NĂNG, NHIỆM VỤ ĐƯỢC GIAO (90 ĐIỂM)", maxPoint: 90, summary: summary.typeA }
+    ];
+    sections.forEach((section, sectionIndex) => {
+      const sectionTasks = state.tasks.filter((task) => task.type === section.type);
+      if (section.code === "A" && state.profile.scale !== "100" && !sectionTasks.length) return;
+      const sectionRow = addRow(filled(4).map((item, index) => index === 0 ? { c: 1, v: `${section.code}. ${section.title}`, s: 4 } : item), 25);
+      merges.push(`A${sectionRow}:U${sectionRow}`);
+      for (let axis = 1; axis <= 6; axis += 1) {
+        const axisTasks = sectionTasks.filter((task) => task.axis === axis);
+        if (!axisTasks.length) continue;
+        const axisRow = addRow(filled(5).map((item, index) => index === 0 ? { c: 1, v: `TRỤC ${axis}. ${AXES[axis].full}`, s: 5 } : item), 29);
+        merges.push(`A${axisRow}:U${axisRow}`);
+        const axisStart = row + 1;
+        const axisCalcs = [];
+        axisTasks.forEach((task) => {
+          taskNumber += 1;
+          const calc = calculateTask(task);
+          const formulaCode = task.code.replace(/"/g, '""');
+          axisCalcs.push({ task, ...calc });
+          const taskRow = row + 1;
+          addRow([
+            { c: 1, v: taskNumber, s: 19 }, { c: 2, v: `Trục ${task.axis}`, s: 9 }, { c: 3, v: task.objective, s: 8 },
+            { c: 4, v: task.keyResult, s: 8 }, { c: 5, v: `${task.code}. ${task.name}`, s: 8 }, { c: 6, v: task.output, s: 8 },
+            { c: 7, v: task.deadline, s: 9 }, { c: 8, v: `Nhóm ${task.group}`, s: 9 }, { c: 9, v: task.unitScore, s: 10 },
+            { c: 10, v: task.planned, s: 19 }, { c: 11, f: `I${taskRow}*J${taskRow}`, cache: calc.standard, s: 10 },
+            { c: 12, f: `COUNTIFS('CHI TIẾT SẢN PHẨM'!$B$2:$B$${detailEnd},"${formulaCode}",'CHI TIẾT SẢN PHẨM'!$E$2:$E$${detailEnd},"Hoàn thành")`, cache: calc.completed, s: 19 },
+            { c: 13, f: `IF(J${taskRow}>0,MIN(L${taskRow}/J${taskRow},1)*K${taskRow},0)`, cache: calc.quantityScore, s: 10 },
+            { c: 14, v: revisionSummary(task), s: 8 },
+            { c: 15, f: `IF(L${taskRow}=0,0,AVERAGEIFS('CHI TIẾT SẢN PHẨM'!$G$2:$G$${detailEnd},'CHI TIẾT SẢN PHẨM'!$B$2:$B$${detailEnd},"${formulaCode}",'CHI TIẾT SẢN PHẨM'!$E$2:$E$${detailEnd},"Hoàn thành"))`, cache: calc.b, s: 11 },
+            { c: 16, f: `O${taskRow}*K${taskRow}`, cache: calc.qualityScore, s: 10 }, { c: 17, v: delaySummary(task), s: 8 },
+            { c: 18, f: `IF(L${taskRow}=0,0,AVERAGEIFS('CHI TIẾT SẢN PHẨM'!$I$2:$I$${detailEnd},'CHI TIẾT SẢN PHẨM'!$B$2:$B$${detailEnd},"${formulaCode}",'CHI TIẾT SẢN PHẨM'!$E$2:$E$${detailEnd},"Hoàn thành"))`, cache: calc.c, s: 11 },
+            { c: 19, f: `R${taskRow}*K${taskRow}`, cache: calc.progressScore, s: 10 },
+            { c: 20, f: `IF(K${taskRow}>0,(M${taskRow}+P${taskRow}+S${taskRow})/(3*K${taskRow}),0)`, cache: calc.kpi, s: 11 },
+            { c: 21, f: `T${taskRow}*K${taskRow}`, cache: calc.actual, s: 10 }
+          ], 55);
+        });
+        const axisEnd = row;
+        const axisSummary = summarizeCalculations(axisCalcs);
+        const subtotal = filled(12);
+        set(subtotal, 1, `Tổng (Trục ${axis})`, 12); set(subtotal, 10, "", 13, `SUM(J${axisStart}:J${axisEnd})`, axisTasks.reduce((sum, task) => sum + task.planned, 0));
+        set(subtotal, 11, "", 13, `SUM(K${axisStart}:K${axisEnd})`, axisSummary.standard);
+        set(subtotal, 12, "", 13, `SUM(L${axisStart}:L${axisEnd})`, axisCalcs.reduce((sum, item) => sum + item.completed, 0));
+        set(subtotal, 13, "", 13, `SUM(M${axisStart}:M${axisEnd})`, axisSummary.quantityScore);
+        set(subtotal, 15, "", 14, `IF(K${row + 1}>0,P${row + 1}/K${row + 1},0)`, axisSummary.standard > 0 ? axisSummary.qualityScore / axisSummary.standard : 0);
+        set(subtotal, 16, "", 13, `SUM(P${axisStart}:P${axisEnd})`, axisSummary.qualityScore);
+        set(subtotal, 18, "", 14, `IF(K${row + 1}>0,S${row + 1}/K${row + 1},0)`, axisSummary.standard > 0 ? axisSummary.progressScore / axisSummary.standard : 0);
+        set(subtotal, 19, "", 13, `SUM(S${axisStart}:S${axisEnd})`, axisSummary.progressScore);
+        set(subtotal, 20, "", 14, `IF(K${row + 1}>0,(M${row + 1}+P${row + 1}+S${row + 1})/(3*K${row + 1}),0)`, axisSummary.kpi);
+        set(subtotal, 21, "", 13, `SUM(U${axisStart}:U${axisEnd})`, axisSummary.actual);
+        const subtotalRow = addRow(subtotal, 24);
+        merges.push(`A${subtotalRow}:G${subtotalRow}`);
+      }
+      const scoreItems = filled(15);
+      set(scoreItems, 1, `ĐIỂM KPI (NHÓM ${section.code})`, 15);
+      set(scoreItems, 20, section.summary.kpi, 14);
+      set(scoreItems, 21, section.summary.kpi * section.maxPoint, 16);
+      const scoreRow = addRow(scoreItems, 26);
+      merges.push(`A${scoreRow}:S${scoreRow}`);
+      groupScoreRows.push(scoreRow);
+    });
+
+    const finalItems = filled(15);
+    const finalLabel = state.profile.scale === "100" ? "TỔNG ĐIỂM (A+B)" : "TỔNG ĐIỂM (NHÓM B - THANG 90)";
+    set(finalItems, 1, finalLabel, 15);
+    const finalFormula = groupScoreRows.length > 1 && state.profile.scale === "100"
+      ? groupScoreRows.map((value) => `U${value}`).join("+")
+      : `U${groupScoreRows[groupScoreRows.length - 1]}`;
+    set(finalItems, 21, summary.scaleScore, 16, finalFormula, summary.scaleScore);
+    const finalRow = addRow(finalItems, 28);
+    merges.push(`A${finalRow}:T${finalRow}`);
+
+    addRow([], 12);
+    const dateRow = addRow([{ c: 14, v: "Quảng Trị, ngày ..... tháng ..... năm ........", s: 18 }], 22);
+    merges.push(`N${dateRow}:U${dateRow}`);
+    const signatureRow = addRow([{ c: 1, v: "NGƯỜI TỰ ĐÁNH GIÁ", s: 17 }, { c: 12, v: "TRƯỞNG PHÒNG/KHOA/ĐƠN VỊ", s: 17 }], 23);
+    merges.push(`A${signatureRow}:J${signatureRow}`, `L${signatureRow}:U${signatureRow}`);
+    const noteRow = addRow([{ c: 1, v: "(Ký, ghi rõ họ tên)", s: 18 }, { c: 12, v: "(Ký, ghi rõ họ tên)", s: 18 }], 20);
+    merges.push(`A${noteRow}:J${noteRow}`, `L${noteRow}:U${noteRow}`);
+    for (let index = 0; index < 4; index += 1) addRow([], 20);
+    const nameRow = addRow([{ c: 1, v: state.profile.name, s: 17 }], 22);
+    merges.push(`A${nameRow}:J${nameRow}`, `L${nameRow}:U${nameRow}`);
+
+    const columns = [5, 9, 22, 24, 28, 22, 13, 14, 10, 10, 12, 10, 11, 18, 9, 11, 18, 9, 11, 10, 12]
+      .map((width, index) => `<col min="${index + 1}" max="${index + 1}" width="${width}" customWidth="1"/>`).join("");
+    return { xml: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:U${row}"/>
+  <sheetViews><sheetView showGridLines="0" workbookViewId="0"><pane ySplit="7" topLeftCell="A8" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <sheetFormatPr defaultRowHeight="18"/><cols>${columns}</cols>
+  <sheetData>${rows.join("")}</sheetData><mergeCells count="${merges.length}">${merges.map((ref) => `<mergeCell ref="${ref}"/>`).join("")}</mergeCells>
+  <printOptions horizontalCentered="1"/><pageMargins left="0.2" right="0.2" top="0.45" bottom="0.45" header="0.2" footer="0.2"/>
+  <pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/><headerFooter><oddFooter>&amp;CTrang &amp;P/&amp;N</oddFooter></headerFooter>
+</worksheet>`, endRow: row };
+  }
+  function buildKpiWorkbook() {
+    if (!globalThis.fflate?.zipSync || !globalThis.fflate?.strToU8) throw new Error("Thiếu bộ tạo tệp Excel trong bản offline.");
+    const report = buildReportSheetXml();
+    const now = new Date().toISOString();
+    const files = {
+      "[Content_Types].xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`,
+      "_rels/.rels": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`,
+      "docProps/core.xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>Bảng chấm điểm kết quả thực hiện nhiệm vụ</dc:title><dc:creator>Ngọc Anh</dc:creator><cp:lastModifiedBy>Ngọc Anh</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified></cp:coreProperties>`,
+      "docProps/app.xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>KPI Tool</Application><DocSecurity>0</DocSecurity><ScaleCrop>false</ScaleCrop><AppVersion>1.0</AppVersion></Properties>`,
+      "xl/workbook.xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><workbookPr/><bookViews><workbookView xWindow="0" yWindow="0" windowWidth="24000" windowHeight="12000"/></bookViews><sheets><sheet name="BẢNG CHẤM ĐIỂM" sheetId="1" r:id="rId1"/><sheet name="CHI TIẾT SẢN PHẨM" sheetId="2" r:id="rId2"/></sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">'BẢNG CHẤM ĐIỂM'!$A$1:$U$${report.endRow}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">'BẢNG CHẤM ĐIỂM'!$5:$7</definedName></definedNames><calcPr calcId="191029" calcMode="auto" fullCalcOnLoad="1" forceFullCalc="1"/></workbook>`,
+      "xl/_rels/workbook.xml.rels": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+      "xl/styles.xml": xlsxStylesXml(),
+      "xl/worksheets/sheet1.xml": report.xml,
+      "xl/worksheets/sheet2.xml": buildDetailSheetXml()
+    };
+    return globalThis.fflate.zipSync(Object.fromEntries(Object.entries(files).map(([name, xml]) => [name, globalThis.fflate.strToU8(xml)])), { level: 6 });
+  }
+  function exportExcel() {
+    if (!state.profile.name.trim() || !state.profile.unit.trim() || !state.profile.period.trim()) {
+      showToast("Vui lòng nhập đủ Họ và tên, Đơn vị và Kỳ đánh giá trước khi xuất Excel.", true);
+      setActiveTab("summary");
+      return;
+    }
+    if (!state.tasks.length) return showToast("Chưa có nhiệm vụ để lập bảng chấm điểm.", true);
+    try {
+      downloadBlob(buildKpiWorkbook(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileStem() + "_Bang_cham_diem_KPI.xlsx");
+      showToast("Đã xuất bảng chấm điểm KPI định dạng .xlsx để in, ký và nộp lưu.");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Không thể tạo tệp Excel.", true);
+    }
+  }
+
+  $$(".tab-button").forEach((button) => button.addEventListener("click", () => setActiveTab(button.dataset.tab)));
+  ["name", "period"].forEach((key) => {
+    $("#profile-" + key).addEventListener("input", (event) => {
+      state.profile[key] = event.target.value;
+      persist();
+    });
+  });
+  $("#profile-unit").addEventListener("change", (event) => {
+    state.profile.unit = event.target.value;
+    persist();
+  });
+  $("#profile-scale").addEventListener("change", (event) => {
+    state.profile.scale = event.target.value;
+    persist();
+    renderSummary();
+  });
+  $("#task-group").addEventListener("change", updateGroupMax);
+  $("#task-cancel").addEventListener("click", resetTaskForm);
+  $("#result-cancel").addEventListener("click", () => resetResultForm());
+  $("#result-task-code").addEventListener("change", () => {
+    updateResultOutput();
+    if (!editingResultId) $("#result-product-no").value = state.results.filter((item) => item.taskCode === $("#result-task-code").value).length + 1;
+  });
+
+  $("#task-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!editingTaskId && state.tasks.length >= MAX_TASKS) return showToast("Đã đạt giới hạn " + MAX_TASKS + " nhiệm vụ.", true);
+    const code = $("#task-code").value.trim().toUpperCase();
+    const group = Math.trunc(toNumber($("#task-group").value, 1));
+    const unitScore = toNumber($("#task-unit-score").value);
+    const planned = toNumber($("#task-planned").value);
+    const duplicate = state.tasks.some((task) => task.code === code && task.id !== editingTaskId);
+    if (!code) return showToast("Vui lòng nhập mã nhiệm vụ.", true);
+    if (duplicate) return showToast("Mã nhiệm vụ đã tồn tại. Hãy dùng mã khác.", true);
+    if (!Number.isInteger(planned) || planned < 0) return showToast("Số lượng kế hoạch phải là số nguyên không âm.", true);
+    if (unitScore < 0 || unitScore > GROUP_MAX[group]) return showToast("Điểm quy đổi không được vượt " + GROUP_MAX[group] + " điểm của Nhóm " + group + ".", true);
+    const payload = {
+      id: editingTaskId || uid("task"), code,
+      axis: Math.trunc(toNumber($("#task-axis").value, 1)),
+      objective: $("#task-objective").value.trim(), keyResult: $("#task-key-result").value.trim(),
+      name: $("#task-name").value.trim(), output: $("#task-output").value.trim(), deadline: $("#task-deadline").value.trim(),
+      type: $("#task-type").value, group, unitScore, planned
+    };
+    if (!payload.name || !payload.output) return showToast("Vui lòng nhập tên nhiệm vụ và sản phẩm đầu ra.", true);
+    if (editingTaskId) {
+      const old = state.tasks.find((task) => task.id === editingTaskId);
+      state.tasks = state.tasks.map((task) => task.id === editingTaskId ? payload : task);
+      if (old && old.code !== code) state.results = state.results.map((item) => item.taskCode === old.code ? { ...item, taskCode: code } : item);
+      persist("Đã cập nhật nhiệm vụ " + code + ".");
+    } else {
+      state.tasks.push(payload);
+      persist("Đã thêm nhiệm vụ " + code + ".");
+    }
+    resetTaskForm();
+    renderAll();
+  });
+
+  $("#task-table-body").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+    if (button.dataset.action === "edit-task") editTask(button.dataset.id);
+    if (button.dataset.action === "delete-task") {
+      const task = state.tasks.find((item) => item.id === button.dataset.id);
+      if (!task) return;
+      const linked = state.results.filter((item) => item.taskCode === task.code).length;
+      if (!confirm("Xóa nhiệm vụ " + task.code + " và " + linked + " kết quả sản phẩm liên quan?")) return;
+      state.tasks = state.tasks.filter((item) => item.id !== task.id);
+      state.results = state.results.filter((item) => item.taskCode !== task.code);
+      persist("Đã xóa nhiệm vụ " + task.code + ".");
+      resetTaskForm();
+      resetResultForm(false);
+      renderAll();
+    }
+  });
+
+  $("#result-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!editingResultId && state.results.length >= MAX_RESULTS) return showToast("Đã đạt giới hạn 500 sản phẩm.", true);
+    const taskCode = $("#result-task-code").value;
+    const productNo = toNumber($("#result-product-no").value);
+    const revisions = toNumber($("#result-revisions").value);
+    const delay = toNumber($("#result-delay").value);
+    if (!state.tasks.some((task) => task.code === taskCode)) return showToast("Hãy thêm nhiệm vụ trước khi nhập sản phẩm.", true);
+    if (![productNo, revisions, delay].every(Number.isInteger) || productNo <= 0 || revisions < 0 || delay < 0) {
+      return showToast("Số SP phải lớn hơn 0; số lần sửa và số ngày chậm phải là số nguyên không âm.", true);
+    }
+    const payload = {
+      id: editingResultId || uid("result"), taskCode, productNo,
+      status: $("#result-status").value, revisions, delay, note: $("#result-note").value.trim()
+    };
+    if (editingResultId) {
+      state.results = state.results.map((item) => item.id === editingResultId ? payload : item);
+      persist("Đã cập nhật kết quả sản phẩm.");
+    } else {
+      state.results.push(payload);
+      persist("Đã thêm kết quả sản phẩm.");
+    }
+    const keepCode = taskCode;
+    resetResultForm(false);
+    renderAll();
+    $("#result-task-code").value = keepCode;
+    updateResultOutput();
+    $("#result-product-no").value = state.results.filter((item) => item.taskCode === keepCode).length + 1;
+  });
+
+  $("#result-table-body").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+    if (button.dataset.action === "edit-result") editResult(button.dataset.id);
+    if (button.dataset.action === "delete-result") {
+      const result = state.results.find((item) => item.id === button.dataset.id);
+      if (!result || !confirm("Xóa kết quả " + result.taskCode + " · sản phẩm " + result.productNo + "?")) return;
+      state.results = state.results.filter((item) => item.id !== result.id);
+      persist("Đã xóa kết quả sản phẩm.");
+      resetResultForm();
+      renderAll();
+    }
+  });
+
+  $("#btn-export-json").addEventListener("click", exportJson);
+  $("#btn-export-xls").addEventListener("click", exportExcel);
+  $("#btn-import-tasks-excel").addEventListener("click", () => $("#task-excel-file").click());
+  $("#btn-download-task-template").addEventListener("click", downloadTaskTemplate);
+  $("#task-excel-file").addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setTaskImportStatus("Đang đọc “" + file.name + "”…");
+    try {
+      const imported = findTaskImport(await readTaskFile(file));
+      if (!imported.tasks.length) {
+        const detail = imported.errors.slice(0, 3).join("; ");
+        throw new Error("Không có dòng nhiệm vụ hợp lệ" + (detail ? ": " + detail : ".") + " Hãy kiểm tra đúng biểu mẫu tải từ Tool.");
+      }
+      const existingCodes = new Set(state.tasks.map((task) => task.code));
+      const updated = imported.tasks.filter((task) => existingCodes.has(task.code)).length;
+      const added = imported.tasks.length - updated;
+      if (state.tasks.length + added > MAX_TASKS) {
+        throw new Error("Sau khi nhập sẽ có " + (state.tasks.length + added) + " nhiệm vụ, vượt giới hạn " + MAX_TASKS + ".");
+      }
+      const invalid = imported.errors.length;
+      const previewErrors = imported.errors.slice(0, 3).join("\n");
+      const question = "Đã đọc trang “" + imported.sheetName + "” trong " + file.name + ".\n\n"
+        + "• Thêm mới: " + added + " nhiệm vụ\n"
+        + "• Cập nhật theo Mã NV: " + updated + " nhiệm vụ\n"
+        + "• Bỏ qua do lỗi: " + invalid + " dòng\n\n"
+        + (previewErrors ? previewErrors + (invalid > 3 ? "\n… và " + (invalid - 3) + " lỗi khác.\n\n" : "\n\n") : "")
+        + "Tiếp tục nhập danh mục? Kết quả sản phẩm hiện có sẽ được giữ nguyên.";
+      if (!confirm(question)) {
+        setTaskImportStatus("Đã hủy nhập dữ liệu từ “" + file.name + "”.");
+        return;
+      }
+      const incoming = new Map(imported.tasks.map((task) => [task.code, task]));
+      const merged = state.tasks.map((task) => incoming.has(task.code) ? { ...incoming.get(task.code), id: task.id } : task);
+      imported.tasks.filter((task) => !existingCodes.has(task.code)).forEach((task) => merged.push({ ...task, id: uid("task") }));
+      state.tasks = merged;
+      resetTaskForm();
+      persist("Đã nhập danh mục nhiệm vụ từ Excel.");
+      renderAll();
+      const result = "Đã nhập từ trang “" + imported.sheetName + "”: thêm " + added + ", cập nhật " + updated
+        + (invalid ? ", bỏ qua " + invalid + " dòng lỗi. " + imported.errors.slice(0, 2).join("; ") : ".");
+      setTaskImportStatus(result, "success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Không thể đọc tệp Excel.";
+      setTaskImportStatus(message, "error");
+      showToast(message, true);
+    } finally {
+      event.target.value = "";
+    }
+  });
+  $("#btn-import-json").addEventListener("click", () => $("#import-file").click());
+  $("#import-file").addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const imported = normalizeState(JSON.parse(await file.text()));
+      if (!confirm("Khôi phục " + imported.tasks.length + " nhiệm vụ và " + imported.results.length + " sản phẩm? Dữ liệu hiện tại sẽ được thay thế.")) return;
+      state = imported;
+      persist("Đã khôi phục dữ liệu từ tệp sao lưu.");
+      resetTaskForm();
+      resetResultForm(false);
+      renderAll();
+    } catch (error) {
+      showToast("Không thể đọc tệp sao lưu. Hãy chọn đúng tệp JSON do công cụ tạo.", true);
+    } finally {
+      event.target.value = "";
+    }
+  });
+  $("#btn-print").addEventListener("click", () => {
+    if (!state.profile.name.trim() || !state.profile.unit.trim() || !state.profile.period.trim()) {
+      showToast("Vui lòng nhập đủ Họ và tên, Đơn vị và Kỳ đánh giá trước khi xuất PDF.", true);
+      setActiveTab("summary");
+      return;
+    }
+    if (!state.tasks.length) return showToast("Chưa có nhiệm vụ để lập bảng chấm điểm.", true);
+    renderPrintReport();
+    setTimeout(() => window.print(), 120);
+  });
+  $("#btn-load-example").addEventListener("click", () => {
+    if (!confirm("Nạp ví dụ NV01 về cập nhật hồ sơ lý lịch? Dữ liệu hiện tại sẽ được thay thế.")) return;
+    state = makeExampleState();
+    persist("Đã khôi phục ví dụ mẫu.");
+    resetTaskForm();
+    resetResultForm(false);
+    renderAll();
+    setActiveTab("summary");
+  });
+  $("#btn-clear-all").addEventListener("click", () => {
+    if (!confirm("Xóa toàn bộ nhiệm vụ và kết quả sản phẩm? Nên Sao lưu trước khi xóa.")) return;
+    state = {
+      version: 3,
+      profile: { ...state.profile },
+      tasks: [],
+      results: [],
+      updatedAt: new Date().toISOString()
+    };
+    persist("Đã xóa toàn bộ dữ liệu nhiệm vụ.");
+    resetTaskForm();
+    resetResultForm(false);
+    renderAll();
+  });
+
+  renderAll();
+  resetTaskForm();
+  resetResultForm();
+})();
+</script>
+</body>
+</html>
